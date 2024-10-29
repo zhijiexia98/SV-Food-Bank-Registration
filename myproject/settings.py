@@ -79,10 +79,18 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sv_foodbank',
+        'USER': 'dbuser',
+        'PASSWORD': 'Cs5200!pass',
+        'HOST': '35.212.200.170',
+        'PORT': '3306',
+        #'OPTIONS': {
+        #    'ssl': {}
+        #}
     }
 }
+
 
 
 # Password validation
