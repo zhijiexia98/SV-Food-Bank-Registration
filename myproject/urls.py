@@ -16,7 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from myproject import views  # Import your views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('register/', views.register, name='register'),  # Add your new route
 ]
+
