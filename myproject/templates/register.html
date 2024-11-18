@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Registration</title>
+    <title>User Login/Registration</title>
 </head>
 <body>
-<h2>User Registration</h2>
+<h2>User Login/Registration</h2>
 <form method="POST" action="/register/">
     {% csrf_token %}
     <label for="donorID">Donor/Admin/NUID:</label><br>
@@ -25,7 +25,7 @@
         <option value="admin">Admin</option>
     </select><br><br>
 
-    <button type="submit">Register</button>
+    <button type="submit">Continue</button>
 </form>
 </body>
 </html>
