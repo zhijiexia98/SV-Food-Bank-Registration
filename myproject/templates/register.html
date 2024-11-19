@@ -1,31 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Login/Registration</title>
-</head>
-<body>
-<h2>User Login/Registration</h2>
-<form method="POST" action="/register/">
-    {% csrf_token %}
-    <label for="donorID">Donor/Admin/NUID:</label><br>
-    <input type="text" id="donorID" name="donorID" required><br><br>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Registration</title>
+    <script>
+      function initializeForm() {
+        const role = localStorage.getItem("role");
+        const studentFields = document.getElementById("studentFields");
+        const schoolEmailField = document.getElementById("schoolEmail");
+        const emailField = document.getElementById("email");
 
-    <label for="name">Name:</label><br>
-    <input type="text" id="name" name="name" required><br><br>
+        // Display different fields based on role
+        if (role === "student") {
+          studentFields.style.display = "block";
+          schoolEmailField.required = true;
 
-    <label for="email">Email:</label><br>
-    <input type="email" id="email" name="email" required><br><br>
+          // Add validation for school email
+          schoolEmailField.setAttribute(
+            "pattern",
+            "^[^@\\s]+@northeastern\\.edu$"
+          );
+          schoolEmailField.setAttribute(
+            "title",
+            "Must be a valid Northeastern University email address."
+          );
 
-    <label for="role">Role:</label><br>
-    <select id="role" name="role" required>
-        <option value="student">Student</option>
-        <option value="donor">Donor</option>
-        <option value="admin">Admin</option>
-    </select><br><br>
+          // Make other student fields required
+          document.getElementById("nuid").required = true;
+          document.getElementById("householdIncome").required = true;
+          document.getElementById("householdNumber").required = true;
 
-    <button type="submit">Continue</button>
-</form>
-</body>
+          // Remove school email restrictions from general email field
+          emailField.removeAttribute("pattern");
+          emailField.removeAttribute("title");
+        } else {
+          // Hide student-specific fields if role is not "student"
+          studentFields.style.display = "none";
+          schoolEmailField.required = false;
+
+          // Reset validation for general email field
+          emailField.setAttribute("pattern", "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+          emailField.setAttribute("title", "Must be a valid email address.");
+
+          // Make student-specific fields not required
+          document.getElementById("nuid").required = false;
+          document.getElementById("householdIncome").required = false;
+          document.getElementById("householdNumber").required = false;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const role = localStorage.getItem("role");
+        if (!role) {
+          alert("Role not found. Please go back and select your role.");
+          window.location.href = "/home/"; // Redirect to home page if role is missing
+        } else {
+          initializeForm();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <h2>User Registration</h2>
+    <form method="POST" action="/register/">
+      {% csrf_token %}
+
+      <!-- Name Field -->
+      <label for="name">Name:</label><br />
+      <input type="text" id="name" name="name" required /><br /><br />
+
+      <!-- Email Field -->
+      <label for="email">Email:</label><br />
+      <input type="email" id="email" name="email" required /><br /><br />
+
+      <!-- School Email for Students -->
+      <div id="studentFields" style="display: none">
+        <label for="schoolEmail">School Email:</label><br />
+        <input
+          type="email"
+          id="schoolEmail"
+          name="schoolEmail"
+          placeholder="example@northeastern.edu"
+        /><br /><br />
+
+        <!-- NUID Field -->
+        <label for="nuid">NUID:</label><br />
+        <input
+          type="number"
+          id="nuid"
+          name="nuid"
+          maxlength="10"
+          placeholder="Enter your 10-digit NUID"
+        /><br /><br />
+
+        <!-- Household Income -->
+        <label for="householdIncome">Household Income:</label><br />
+        <input
+          type="number"
+          id="householdIncome"
+          name="householdIncome"
+          maxlength="8"
+          placeholder="Income in USD"
+        />
+        USD<br /><br />
+
+        <!-- Household Number -->
+        <label for="householdNumber">Household Number:</label><br />
+        <input
+          type="number"
+          id="householdNumber"
+          name="householdNumber"
+          placeholder="Number of members"
+        /><br /><br />
+      </div>
+
+      <!-- Password Field -->
+      <label for="password">Password:</label><br />
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+      /><br /><br />
+
+      <!-- Address Field -->
+      <label for="address">Address (optional):</label><br />
+      <input type="text" id="address" name="address" /><br /><br />
+
+      <!-- Submit Button -->
+      <button type="submit">Submit</button>
+    </form>
+  </body>
 </html>

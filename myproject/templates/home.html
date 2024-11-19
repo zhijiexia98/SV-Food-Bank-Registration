@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Bank Home Page</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 100px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            margin: 15px;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button.donor {
+            background-color: #28a745;
+        }
+        .button.donor:hover {
+            background-color: #218838;
+        }
+        .button.student {
+            background-color: #ffc107;
+        }
+        .button.student:hover {
+            background-color: #e0a800;
+        }
+        .button.admin {
+            background-color: #6c757d;
+        }
+        .button.admin:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Northeastern University - Silicon Valley Food Bank</h1>
+        <p>Please select your entrance:</p>
+        <button class="button donor" id="donorBtn">Donor</button>
+        <button class="button student" id="studentBtn">Student</button>
+        <button class="button admin" id="adminBtn">Admin</button>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Function to save role in local storage and redirect
+            function handleRoleSelection(role) {
+                localStorage.setItem('role', role); // Store the role in local storage
+                window.location.href = '/register/'; // Redirect to the path
+            }
+
+            // Donor button click event
+            $('#donorBtn').click(function() {
+                handleRoleSelection('donor');
+            });
+
+            // Student button click event
+            $('#studentBtn').click(function() {
+                handleRoleSelection('student');
+            });
+
+            // Admin button click event
+            $('#adminBtn').click(function() {
+                handleRoleSelection('admin');
+            });
+        });
+    </script>
+</body>
+</html>
