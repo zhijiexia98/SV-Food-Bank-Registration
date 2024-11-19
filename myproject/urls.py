@@ -23,6 +23,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', views.register, name='register'),  
     path('home/', views.home), # Add your new route
+    path('profile/', views.register),
+    path('profile/edit/', views.register),
+    # path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
     path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
+    path('chatbox/', views.chatbox, name='chatbox'),
 ]
 

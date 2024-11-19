@@ -3,66 +3,86 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Registration</title>
+    <title>User Login/Registration</title>
     <script>
-      function initializeForm() {
-        const role = localStorage.getItem("role");
-        const studentFields = document.getElementById("studentFields");
-        const schoolEmailField = document.getElementById("schoolEmail");
-        const emailField = document.getElementById("email");
+      // Function to determine the current URL and adjust the page rendering
+      function initializePage() {
+        const currentUrl = window.location.pathname;
+        const isProfilePage = currentUrl.endsWith("/profile/");
+        const isEditPage = currentUrl.endsWith("/profile/edit/");
 
-        // Display different fields based on role
-        if (role === "student") {
-          studentFields.style.display = "block";
-          schoolEmailField.required = true;
+        const formFields = document.querySelectorAll("input, select");
+        const submitButton = document.getElementById("submitButton");
+        const title = document.getElementById("pageTitle");
 
-          // Add validation for school email
-          schoolEmailField.setAttribute(
-            "pattern",
-            "^[^@\\s]+@northeastern\\.edu$"
-          );
-          schoolEmailField.setAttribute(
-            "title",
-            "Must be a valid Northeastern University email address."
-          );
+        if (isProfilePage && !isEditPage) {
+          console.log("profile page")
+          // Set fields to read-only
+          formFields.forEach((field) => {
+            field.readOnly = true;
+            field.disabled = true; // Disable select elements
+          });
 
-          // Make other student fields required
-          document.getElementById("nuid").required = true;
-          document.getElementById("householdIncome").required = true;
-          document.getElementById("householdNumber").required = true;
+          title.innerText = "Profile";
+          // Change the button text to "Edit"
+          submitButton.textContent = "Edit";
+          submitButton.type = "button"; // Prevent form submission
 
-          // Remove school email restrictions from general email field
-          emailField.removeAttribute("pattern");
-          emailField.removeAttribute("title");
-        } else {
-          // Hide student-specific fields if role is not "student"
-          studentFields.style.display = "none";
-          schoolEmailField.required = false;
+          // Set up click handler for edit mode
+          submitButton.onclick = () => {
+            window.location.href = currentUrl + "edit/";
+          };
 
-          // Reset validation for general email field
-          emailField.setAttribute("pattern", "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
-          emailField.setAttribute("title", "Must be a valid email address.");
+          // Fetch user data from backend and fill the form
+          fetchUserData();
+        } else if (isEditPage) {
+          title.innerText = "Edit Profile";
 
-          // Make student-specific fields not required
-          document.getElementById("nuid").required = false;
-          document.getElementById("householdIncome").required = false;
-          document.getElementById("householdNumber").required = false;
+          fetchUserData();
+
+          console.log("edit page")
+          // Enable editing
+          formFields.forEach((field) => {
+            field.readOnly = false;
+            field.disabled = false; // Enable select elements
+          });
+
+          // Change the button text to "Submit"
+          submitButton.textContent = "Submit";
+
+          // Set up the form for submission
+          submitButton.type = "submit";
         }
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        const role = localStorage.getItem("role");
-        if (!role) {
-          alert("Role not found. Please go back and select your role.");
-          window.location.href = "/home/"; // Redirect to home page if role is missing
-        } else {
-          initializeForm();
+      // Simulated function to fetch user data from the backend
+      function fetchUserData() {
+        // Replace this with actual fetch logic
+        const mockUserData = {
+          name: "John Doe",
+          email: "johndoe@example.com",
+          schoolEmail: "john@northeastern.edu",
+          nuid: "1234567890",
+          householdIncome: "50000",
+          householdNumber: "4",
+          address: "123 Main St",
+          role: "student",
+        };
+
+        // Fill the form with user data
+        for (const key in mockUserData) {
+          const field = document.getElementById(key);
+          if (field) {
+            field.value = mockUserData[key];
+          }
         }
-      });
+      }
+
+      document.addEventListener("DOMContentLoaded", initializePage);
     </script>
   </head>
   <body>
-    <h2>User Registration</h2>
+    <h2 id="pageTitle">User Registration</h2>
     <form method="POST" action="/register/">
       {% csrf_token %}
 
@@ -75,7 +95,7 @@
       <input type="email" id="email" name="email" required /><br /><br />
 
       <!-- School Email for Students -->
-      <div id="studentFields" style="display: none">
+      <div id="studentFields">
         <label for="schoolEmail">School Email:</label><br />
         <input
           type="email"
@@ -129,7 +149,7 @@
       <input type="text" id="address" name="address" /><br /><br />
 
       <!-- Submit Button -->
-      <button type="submit">Submit</button>
+      <button id="submitButton" type="submit">Submit</button>
     </form>
   </body>
 </html>
