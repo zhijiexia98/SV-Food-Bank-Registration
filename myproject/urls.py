@@ -16,10 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.shortcuts import redirect  # Import redirect
 from myproject import views  # Import your views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', views.register, name='register'),  # Add your new route
+    path('register/', views.register, name='register'),  
+    path('home/', views.home), # Add your new route
+    path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
 ]
 
