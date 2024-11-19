@@ -28,5 +28,6 @@ urlpatterns = [
     # path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
     path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
     path('chatbox/', views.chatbox, name='chatbox'),
+    path('donation/', views.donation, name='donation'),
 ]
 
