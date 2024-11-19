@@ -26,5 +26,7 @@ urlpatterns = [
     path('profile/', views.register),
     path('profile/edit/', views.register),
     # path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
+    path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
+    path('chatbox/', views.chatbox, name='chatbox'),
 ]
 
