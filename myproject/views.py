@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
+from django.shortcuts import render
 
 def register(request):
     if request.method == "POST":
@@ -50,3 +51,8 @@ def register(request):
 
 def home(request):
     return render(request, 'home.html')
+
+
+def chatbox(request):
+    role = request.session.get('role')  # Retrieve user role from session
+    return render(request, 'chatbox.html', {'role': role})
