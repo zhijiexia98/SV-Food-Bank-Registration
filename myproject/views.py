@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
+# from .models import User
 
 def register(request):
     if request.method == "POST":
@@ -47,6 +48,37 @@ def register(request):
 
     return render(request, 'register.html')
 
+# def update(request):
+#     if request.method == "POST":
+#         # Get common fields
+#         email = request.POST.get('email')
+
+#         try:
+#             # Check if the user already exists
+#             user = User.objects.get(email=email)
+            
+#             # Update the user's information
+#             user.name = request.POST.get('name')
+#             user.password = request.POST.get('password')
+#             user.address = request.POST.get('address', None)
+
+#             # Update role-specific fields
+#             role = request.POST.get('role', user.role)
+#             user.role = role
+#             if role == 'student':
+#                 user.nuid = request.POST.get('nuid')
+#                 user.school_email = request.POST.get('schoolEmail')
+#                 user.household_income = request.POST.get('householdIncome')
+#                 user.household_number = request.POST.get('householdNumber')
+
+#             user.save()
+#             return HttpResponse(f"User {user.name} updated successfully.")
+
+#         except User.DoesNotExist:
+#             # If the user does not exist, create a new one
+#             return register_new_user(request)  # Call the existing logic for new user registration
+
+#     return render(request, 'register.html')
 
 def home(request):
     return render(request, 'home.html')
