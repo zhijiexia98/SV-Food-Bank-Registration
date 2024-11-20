@@ -51,6 +51,38 @@ def register(request):
 
     return render(request, 'register.html')
 
+# @csrf_exempt
+def login(request):
+    '''if request.method == "POST":
+        try:
+            # Parse JSON body from request
+            data = json.loads(request.body)
+            email = data.get("email")
+            password = data.get("password")
+
+            # Validate credentials
+            user = USER_DB.get(email)
+            if user and user["password"] == password:
+                return JsonResponse({
+                    "uid": user["uid"],
+                    "name": user["name"],
+                    "role": user["role"],
+                }, status=200)
+            else:
+                return JsonResponse({"error": "Invalid email or password."}, status=401)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format."}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)'''
+
+    if request.method == "GET":
+        # Render the login page for GET requests
+        return render(request, 'login.html')
+
+    # Return error for unsupported HTTP methods
+    '''return JsonResponse({"error": "Invalid request method."}, status=405)'''
+
 '''def update(request):
     if request.method == "POST":
         # Get common fields
@@ -86,13 +118,13 @@ def register(request):
 def home(request):
     return render(request, 'home.html')
 
-
 def chatbox(request):
     role = request.session.get('role')  # Retrieve user role from session
     return render(request, 'chatbox.html', {'role': role})
 
 def donation(request):
-    return render(request, 'donation.html')
+    uid = request.session.get('UID')
+    return render(request, 'donation.html', {'uid': uid})
 
 # donation with backend integration
 # donation model: uid, name, amount, date

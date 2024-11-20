@@ -4,6 +4,43 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Login/Registration</title>
+    <style>
+      body {
+        background: linear-gradient(120deg, #e3f2fd, #f1f8e9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .registration-card {
+        width: 100%;
+        max-width: 600px;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-color: white;
+      }
+
+      .btn-submit {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .btn-submit:hover {
+        background-color: #0056b3;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+    </style>
     <script>
       function initializeForm(role) {
         const studentFields = document.getElementById("studentFields");
@@ -129,74 +166,92 @@
     </script>
   </head>
   <body>
-    <h2 id="pageTitle">User Registration</h2>
-    <form method="POST" action="/register/">
-      {% csrf_token %}
+    <div class="registration-card">
+      <h2 id="pageTitle">User Registration</h2>
+      <form method="POST" action="/register/">
+        {% csrf_token %}
 
-      <!-- Name Field -->
-      <label for="name">Name:</label><br />
-      <input type="text" id="name" name="name" required /><br /><br />
+        <!-- Name Field -->
+        <div  class="form-group">
+          <label for="name">Name:</label><br />
+          <input type="text" id="name" name="name" required />
+        </div>
 
-      <!-- Email Field -->
-      <label for="email">Email:</label><br />
-      <input type="email" id="email" name="email" required /><br /><br />
+        <!-- Email Field -->
+        <div  class="form-group">
+          <label for="email">Email:</label><br />
+          <input type="email" id="email" name="email" required />
+        </div>
 
-      <!-- School Email for Students -->
-      <div id="studentFields" style="display: none">
-        <label for="schoolEmail">School Email:</label><br />
-        <input
-          type="email"
-          id="schoolEmail"
-          name="schoolEmail"
-          placeholder="example@northeastern.edu"
-        /><br /><br />
+        <!-- School Email for Students -->
+        <div id="studentFields" style="display: none">
+          <div  class="form-group">
+            <label for="schoolEmail">School Email:</label><br />
+            <input
+              type="email"
+              id="schoolEmail"
+              name="schoolEmail"
+              placeholder="example@northeastern.edu"
+            />
+          </div>
 
-        <!-- NUID Field -->
-        <label for="nuid">NUID:</label><br />
-        <input
-          type="number"
-          id="nuid"
-          name="nuid"
-          maxlength="10"
-          placeholder="Enter your 10-digit NUID"
-        /><br /><br />
+          <!-- NUID Field -->
+          <div  class="form-group">
+            <label for="nuid">NUID:</label><br />
+            <input
+              type="number"
+              id="nuid"
+              name="nuid"
+              maxlength="10"
+              placeholder="Enter your 10-digit NUID"
+            />
+          </div>
 
-        <!-- Household Income -->
-        <label for="householdIncome">Household Income:</label><br />
-        <input
-          type="number"
-          id="householdIncome"
-          name="householdIncome"
-          maxlength="8"
-          placeholder="Income in USD"
-        />
-        USD<br /><br />
+          <!-- Household Income -->
+          <div  class="form-group">
+            <label for="householdIncome">Household Income:</label><br />
+            <input
+              type="number"
+              id="householdIncome"
+              name="householdIncome"
+              maxlength="8"
+              placeholder="Income in USD"
+            />
+            USD
+          </div>
 
-        <!-- Household Number -->
-        <label for="householdNumber">Household Number:</label><br />
-        <input
-          type="number"
-          id="householdNumber"
-          name="householdNumber"
-          placeholder="Number of members"
-        /><br /><br />
-      </div>
+          <!-- Household Number -->
+          <div  class="form-group">
+            <label for="householdNumber">Household Number:</label><br />
+            <input
+              type="number"
+              id="householdNumber"
+              name="householdNumber"
+              placeholder="Number of members"
+            />
+          </div>
+        </div>
 
-      <!-- Password Field -->
-      <label for="password">Password:</label><br />
-      <input
-        type="password"
-        id="password"
-        name="password"
-        required
-      /><br /><br />
+        <!-- Password Field -->
+        <div  class="form-group">
+          <label for="password">Password:</label><br />
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+          />
+        </div>
 
-      <!-- Address Field -->
-      <label for="address">Address (optional):</label><br />
-      <input type="text" id="address" name="address" /><br /><br />
+        <!-- Address Field -->
+        <div  class="form-group">
+          <label for="address">Address (optional):</label><br />
+          <input type="text" id="address" name="address" />
+        </div>
 
-      <!-- Submit Button -->
-      <button id="submitButton" type="submit">Submit</button>
-    </form>
+        <!-- Submit Button -->
+        <button id="submitButton" type="submit" class="btn btn-submit w-100">Submit</button>
+      </form>
+    </div>
   </body>
 </html>
