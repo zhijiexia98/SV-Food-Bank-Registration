@@ -22,6 +22,7 @@ from myproject import views  # Import your views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', views.register, name='register'),  
+    path('login/', views.login, name='login'),
     path('home/', views.home), # Add your new route
     path('profile/', views.register),
     path('profile/edit/', views.register),
