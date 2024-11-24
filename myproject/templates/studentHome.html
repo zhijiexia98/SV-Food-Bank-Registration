@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEU Food Bank - Student Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #c41e3a; 
+            --secondary-color: #242424;
+            --bg-light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(120deg, #e3f2fd, #f1f8e9);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background-color: var(--primary-color);
+        }
+
+        .nav-link {
+            color: white !important;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 2px solid #eee;
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .search-box {
+            border-radius: 20px;
+            padding: 20px;
+            background: white;
+            margin-bottom: 30px;
+        }
+
+        .btn-custom {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 20px;
+            padding: 8px 20px;
+        }
+
+        .btn-custom:hover {
+            background-color: #a01830;
+            color: white;
+        }
+
+        .profile-section {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">NEU Food Bank</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-user"></i> Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Left Sidebar - Profile -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="profile-section">
+                        <img src="https://via.placeholder.com/100" class="profile-img" alt="Profile">
+                        <h5>Welcome, <span id="studentName">John</span></h5>
+                        <p class="text-muted">Student ID: <span id="studentId">001234567</span></p>
+                        <button class="btn btn-custom btn-sm">Edit Profile</button>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Your Stats</h6>
+                        
+                        <div class="d-flex justify-content-between">
+                            <span>Points available:</span>
+                            <span class="badge bg-success">150</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Search Section -->
+                <div class="search-box">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <select class="form-select" id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="fruits">Fruits & Vegetables</option>
+                                <option value="grains">Grains & Pasta</option>
+                                <option value="protein">Protein</option>
+                                <option value="dairy">Dairy</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="dietaryFilter">
+                                <option value="">Dietary Preferences</option>
+                                <option value="vegetarian">Vegetarian</option>
+                                <option value="vegan">Vegan</option>
+                                <option value="halal">Halal</option>
+                                <option value="glutenFree">Gluten Free</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-custom w-100" onclick="searchItems()">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Items Grid -->
+                <div class="row" id="itemsGrid">
+                    <!-- Items will be dynamically populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 加载页面时获取用户信息
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserInfo();
+            loadAvailableItems();
+        });
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/student/info');
+                const data = await response.json();
+                document.getElementById('studentName').textContent = data.name;
+                document.getElementById('studentId').textContent = data.studentId;
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        async function loadAvailableItems() {
+            try {
+                const response = await fetch('/api/food/available');
+                const items = await response.json();
+                displayItems(items);
+            } catch (error) {
+                console.error('Error loading items:', error);
+            }
+        }
+
+        async function searchItems() {
+            const category = document.getElementById('categoryFilter').value;
+            const dietary = document.getElementById('dietaryFilter').value;
+            
+            try {
+                const response = await fetch(`/api/food/search?category=${category}&dietary=${dietary}`);
+                const items = await response.json();
+                displayItems(items);
+            } catch (error) {
+                console.error('Error searching items:', error);
+            }
+        }
+
+        function displayItems(items) {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = items.map(item => `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">${item.name}</h5>
+                            <span class="status-badge bg-${item.quantity > 10 ? 'success' : 'warning'}">
+                                ${item.quantity} available
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">${item.description}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-utensils"></i> ${item.category}
+                                </small>
+                                <button class="btn btn-custom btn-sm" onclick="requestItem(${item.id})">
+                                    Request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function requestItem(itemId) {
+            try {
+                const response = await fetch('/api/food/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ itemId })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('Item requested successfully!');
+                    loadAvailableItems(); // Refresh the items list
+                } else {
+                    alert(result.message || 'Failed to request item');
+                }
+            } catch (error) {
+                console.error('Error requesting item:', error);
+                alert('An error occurred while requesting the item');
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

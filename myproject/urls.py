@@ -30,5 +30,7 @@ urlpatterns = [
     path('', lambda request: redirect('home/', permanent=False)),  # Redirect root to /home/
     path('chatbox/', views.chatbox, name='chatbox'),
     path('donation/', views.donation, name='donation'),
+    path('studentHome/', views.studentHome, name='studentHome'),
+    path('adminHome/', views.adminHome, name='adminHome'),
 ]
 
