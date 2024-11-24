@@ -6,10 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbox - NU Food Bank</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Ensure font-awesome CSS is included properly -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        /* [Your existing CSS styles remain unchanged] */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -120,18 +118,14 @@
     </div>
 </div>
 
-<!-- Include the CSRF token -->
-{% csrf_token %}
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    // Get the role from the backend
     const userRole = "{{ role }}";
     document.getElementById('user-role').innerText = userRole;
 
     // Redirect to the profile page when the profile icon is clicked
     document.getElementById('profile-icon').addEventListener('click', () => {
-        window.location.href = '/profile/'; // Update this path to the actual profile page URL
+        window.location.href = '/profile/';
     });
 
     function appendMessage(message, isUser = true) {
@@ -147,16 +141,14 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Function to get CSRF token from cookies
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
-            for (let i=0; i<cookies.length; i++) {
+            for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length +1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length +1));
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }
             }
@@ -172,10 +164,8 @@
             messageInput.value = '';
             messageInput.focus();
 
-            // Disable the send button while waiting for response
             document.getElementById('send-btn').disabled = true;
 
-            // Send AJAX request to the server
             fetch('/chatbox/', {
                 method: 'POST',
                 headers: {
@@ -186,7 +176,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Re-enable the send button
                 document.getElementById('send-btn').disabled = false;
 
                 if (data.response) {
@@ -203,10 +192,9 @@
         }
     });
 
-    // Allow pressing Enter to send message
-    document.getElementById('message-input').addEventListener('keypress', function(event) {
+    document.getElementById('message-input').addEventListener('keypress', function (event) {
         if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault(); // Prevent newline
+            event.preventDefault();
             document.getElementById('send-btn').click();
         }
     });
