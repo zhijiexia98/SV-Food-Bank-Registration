@@ -83,6 +83,20 @@
             text-align: center;
             color: #444;
         }
+        .register-link {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .register-link a {
+            color: #666;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .register-link a:hover {
+            color: #5a5a5a;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -92,12 +106,14 @@
             "Making a difference starts with one step, one dollar, one donation at
             a time."
         </p>
-        <!-- <p class="entrance-text">Login as:</p> -->
         <div class="button-group">
             <button class="button donor" id="donorBtn">Donor</button>
             <button class="button student" id="studentBtn">Student</button>
             <button class="button admin" id="adminBtn">Admin</button>
         </div>
+        <p class="register-link">
+            New user? Register <a href="/register/">here</a>
+        </p>
     </div>
 
     <script>
