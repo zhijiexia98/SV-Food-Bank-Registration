@@ -116,8 +116,8 @@
                 <div class="card">
                     <div class="profile-section">
                         <img src="https://via.placeholder.com/100" class="profile-img" alt="Profile">
-                        <h5>Welcome, <span id="studentName">John</span></h5>
-                        <p class="text-muted">Student ID: <span id="studentId">001234567</span></p>
+                        <h5>Welcome, <span id="studentName">Loading...</span></h5>
+                        <p class="text-muted">Student ID: <span id="studentId">Loading...</span></p>
                         <button class="btn btn-custom btn-sm">Edit Profile</button>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                         
                         <div class="d-flex justify-content-between">
                             <span>Points available:</span>
-                            <span class="badge bg-success">150</span>
+                            <span class="badge bg-success" id="studentPoints">loading...</span>
                         </div>
                     </div>
                 </div>
@@ -176,17 +176,25 @@
 
     <script>
         // 加载页面时获取用户信息
-        document.addEventListener('DOMContentLoaded', function() {
-            loadUserInfo();
+        document.addEventListener('DOMContentLoaded', function () {
+            const uid = getUidFromUrl(); // Get UID from the URL
+            loadUserInfo(uid);           // Pass the UID to the API call
             loadAvailableItems();
         });
 
-        async function loadUserInfo() {
+        function getUidFromUrl() {
+            const urlParts = window.location.pathname.split('/');
+            return urlParts[urlParts.length - 2]; // Assuming the URL ends with /<uid>/
+        }
+
+        async function loadUserInfo(uid) {
             try {
-                const response = await fetch('/api/student/info');
+                // Corrected URL construction using backticks for template literals
+                const response = await fetch(`/api/student/info/${uid}`);
                 const data = await response.json();
                 document.getElementById('studentName').textContent = data.name;
                 document.getElementById('studentId').textContent = data.studentId;
+                document.getElementById('studentPoints').textContent = data.points; // Update points display
             } catch (error) {
                 console.error('Error loading user info:', error);
             }
@@ -221,7 +229,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5 class="card-title mb-0">${item.name}</h5>
+                            <h5 class="card-title mb-0">${item.package_name}</h5>
                             <span class="status-badge bg-${item.quantity > 10 ? 'success' : 'warning'}">
                                 ${item.quantity} available
                             </span>
@@ -243,24 +251,28 @@
         }
 
         async function requestItem(itemId) {
+            // Assume uid is passed in the URL, e.g., "/request/3/"
+            const uid = window.location.pathname.split("/")[2]; // Extract uid from URL
+
             try {
-                const response = await fetch('/api/food/request', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ itemId })
+                const response = await fetch(`/request/${uid}/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ itemId }),
                 });
-                const result = await response.json();
-                if (result.success) {
-                    alert('Item requested successfully!');
-                    loadAvailableItems(); // Refresh the items list
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message);
+                    // Optionally, refresh available items or update UI
+                    loadAvailableItems();
                 } else {
-                    alert(result.message || 'Failed to request item');
+                    alert(`Error: ${data.message || data.error}`);
                 }
             } catch (error) {
-                console.error('Error requesting item:', error);
-                alert('An error occurred while requesting the item');
+                console.error("Error requesting item:", error);
+                alert("An error occurred while requesting the item.");
             }
         }
     </script>

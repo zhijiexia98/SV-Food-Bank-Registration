@@ -130,11 +130,11 @@
 
               // Redirect based on user role
               if (role === "student") {
-                window.location.href = `/${uid}/studentHome/`;
+                window.location.href = `/studentHome/${uid}/`; // Dynamic route
               } else if (role === "donor") {
-                window.location.href = `/${uid}/donation/`;
+                window.location.href = `/donation/${uid}/`; // Dynamic route
               } else if (role === "admin") {
-                window.location.href = `/${uid}/admin/`;
+                window.location.href = `/adminHome/${uid}/`; // Dynamic route
               }
             } else {
               // Display error message if login fails
