@@ -14,7 +14,7 @@ class AdminLogs(models.Model):
     action = models.CharField(max_length=255)
     target_id = models.IntegerField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    logged_at = models.DateTimeField(blank=True, null=True)
+    logged_at = models.DateTimeField(default=now)
 
     class Meta:
         # managed = False
@@ -47,7 +47,7 @@ class FoodPackages(models.Model):
     quantity = models.IntegerField()
     price_per_package = models.DecimalField(max_digits=10, decimal_places=2)
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
-    purchased_at = models.DateTimeField(blank=True, null=True)
+    purchased_at = models.DateTimeField(default=now)
     admin = models.ForeignKey('Users', models.DO_NOTHING)
 
     class Meta:
@@ -60,8 +60,8 @@ class Requests(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     reason = models.TextField()
     status = models.CharField(max_length=8, blank=True, null=True)
-    requested_at = models.DateTimeField(blank=True, null=True)
-    processed_at = models.DateTimeField(blank=True, null=True)
+    requested_at = models.DateTimeField(default=now)
+    processed_at = models.DateTimeField(default=now)
     admin = models.ForeignKey('Users', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
     package = models.ForeignKey(FoodPackages, models.DO_NOTHING, blank=True, null=True)
     request_id = models.IntegerField(unique=True, blank=True, null=True)
@@ -90,7 +90,7 @@ class Users(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_active = models.IntegerField(blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(default=now)
     point = models.IntegerField(blank=True, null=True)
     student_id = models.IntegerField(unique=True, blank=True, null=True)
 

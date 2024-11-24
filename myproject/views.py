@@ -158,40 +158,43 @@ def call_gpt_api(prompt, max_tokens=150):
 # 用户注册
 def register(request):
     if request.method == "POST":
-        # Get common fields
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        address = request.POST.get('address', None)
-        role = request.POST.get('role', None)
-
-        # Role-specific fields
-        nuid = request.POST.get('nuid') if role == 'student' else None
-        school_email = request.POST.get('schoolEmail') if role == 'student' else None
-        household_income = request.POST.get('householdIncome') if role == 'student' else None
-        household_number = request.POST.get('householdNumber') if role == 'student' else None
-
-        # Validation
-        if not name or not email or not password or not role:
-            return HttpResponse("Registration failed. Missing required fields.", status=400)
-
-        # 保存用户数据到数据库
         try:
-            user = Users.objects.create(
-                name=name,
-                email=email,
-                password=password,
-                address=address,
-                role=role,
-                nuid=nuid,
-                school_email=school_email,
-                household_income=household_income,
-                household_number=household_number
-            )
-            user.save()
-            return HttpResponse(f"Registration successful for {name} with role: {role}.")
-        except ValidationError as e:
-            return HttpResponse(f"Registration failed: {e.message}")
+            # Get common fields
+            name = request.POST.get('name')
+            email = request.POST.get('email', None) or request.POST.get('schoolEmail', None)
+            password = request.POST.get('password')
+            role = request.POST.get('role')
+            address = request.POST.get('address', None)
+            phone = request.POST.get('phone', None)
+
+            # Role-specific fields
+            nuid = request.POST.get('nuid') if role == 'student' else None
+
+            # Validation
+            if not name or not email or not password or not role:
+                return HttpResponse("Registration failed. Missing required fields.", status=400)
+
+            # Prepare data for the new user
+            user_data = {
+                'username': name,
+                'email': email,
+                'password': password,
+                'role': role,
+                'phone': phone,
+                'balance': 0 if role in ['donor', 'student'] else None,  # Balance for donors and students
+                'is_active': True,
+                'created_at': now(),
+                'point': 0,  # Default point value
+                'student_id': nuid if role == 'student' else None  # Assign NUID for students
+            }
+
+            # Save user to database
+            user = Users.objects.create(**user_data)
+
+            return JsonResponse({'success': True, 'message': f"Registration successful for {name} with role: {role}."})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
     return render(request, 'register.html')
 
