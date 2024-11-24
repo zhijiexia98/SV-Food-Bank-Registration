@@ -10,6 +10,7 @@ from .models import Users, Student, FoodPackages, Requests, Donations  # 确保�
 import json
 from django.http import JsonResponse
 from django.utils.timezone import now
+# from openai.error import AuthenticationError, RateLimitError, OpenAIError
 
 def fetch_donations(request, user_id):
     try:
@@ -143,25 +144,31 @@ def search_food_items(request):
 
 # 封装 GPT API 调用函数
 def call_gpt_api(prompt, max_tokens=100):
-    openai.api_key = settings.OPENAI_API_KEY
+    openai.api_key = settings.OPENAI_API_KEY  # Ensure your API key is correctly set
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Or another model you're authorized to use
-            prompt=prompt,
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Use the newer ChatGPT models like "gpt-4" or "gpt-3.5-turbo"
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},  # System role defines behavior
+                {"role": "user", "content": prompt},  # User input
+            ],
             max_tokens=max_tokens,
-            n=1,
             temperature=0.7,
         )
-        return response.choices[0].text.strip()
-    except openai.error.AuthenticationError as e:
+        return response['choices'][0]['message']['content'].strip()
+    except AuthenticationError as e:
         print(f"Authentication Error: {e}")
-        return "Authentication error: invalid API key."
-    except openai.error.RateLimitError as e:
+        return "Authentication error: Invalid API key."
+    except RateLimitError as e:
         print(f"Rate Limit Exceeded: {e}")
         return "Rate limit exceeded. Please try again later."
-    except Exception as e:
+    except OpenAIError as e:  # Catch all other OpenAI-specific errors
+        print(f"OpenAI API Error: {e}")
+        return "An OpenAI API error occurred."
+    except Exception as e:  # Catch any other unforeseen errors
         print(f"Unexpected Error: {e}")
         return "An unexpected error occurred."
+
 
 
 
@@ -284,11 +291,14 @@ def donor_suggestion_internal(donor_id):
     try:
         donor = Users.objects.get(id=donor_id, role='donor')
         balance = donor.balance
+        print(f"Debug: Donor ID {donor_id}, Balance {balance}")  # Log donor details
         prompt = f"The donor's current balance is ${balance}. Suggest an optimal donation amount for food packages, ensuring the balance does not drop below $50."
         suggestion = call_gpt_api(prompt, max_tokens=50)
         return f"Suggested donation amount: {suggestion}"
     except Users.DoesNotExist:
+        print(f"Error: Donor ID {donor_id} not found")
         return "Donor not found."
+
 
 
 
