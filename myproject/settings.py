@@ -18,6 +18,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Use 'staticfiles' for deployment compatibility
 
+# OPENAI_API_KEY = "sk-y4o2eLlpLl79o1jsSoWLmS4IV3drCEaFmURHoUHMNhT3BlbkFJkppCp0vYOXuvBaq-qUnihHvxnvl2kRNZ4YteDUEHEA"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
