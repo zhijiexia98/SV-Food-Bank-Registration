@@ -27,8 +27,16 @@ urlpatterns = [
     path('profile/', views.register),
     path('profile/edit/', views.register),
     path('', lambda request: redirect('home/', permanent=False)),
-    path('chatbox/', chatbox.chatbox_view, name='chatbox'),
-
+    path('chatbox/', views.chatbox, name='chatbox'),
+    path('donation/<int:uid>/', views.donation, name='donation'),  # Dynamic UID
+    path('studentHome/<int:uid>/', views.studentHome, name='studentHome'),  # Dynamic UID
+    path('adminHome/<int:uid>/', views.adminHome, name='adminHome'),  # Dynamic UID
+    path('api/student/info/<int:uid>', views.student_info, name='student_info'),  # Fetch student info
+    path('api/food/available', views.available_food_items, name='available_food_items'),  # Fetch available food items
+    path('api/food/search', views.search_food_items, name='search_food_items'),  # Search food items
+    path("request/<int:uid>/", views.request_food_item, name="request_food_item"),
+    path("donor/<int:user_id>/", views.fetch_donations, name="fetch_donations"),
+    path("donor/<int:user_id>/submit/", views.submit_donation, name="submit_donation"),
 ]
 
 

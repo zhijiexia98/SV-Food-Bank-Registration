@@ -282,24 +282,3 @@ def adminHome(request, uid):
     # Use the uid to fetch user-specific data
     user = Users.objects.get(id=uid)
     return render(request, 'adminHome.html', {'user': user})
-
-# API endpoints for food queries
-def food_dietary(request):
-    restriction = request.GET.get('restriction')
-    # 实现查询逻辑
-    items = [] # 从数据库查询符合条件的食物
-    return JsonResponse(items, safe=False)
-
-def food_allergies(request):
-    allergies = json.loads(request.body).get('allergies', [])
-    # 实现查询逻辑
-    items = [] # 从数据库查询不含过敏原的食物
-    return JsonResponse(items, safe=False)
-
-def food_nutrition(request):
-    data = json.loads(request.body)
-    nutrient_type = data.get('nutrientType')
-    serving_size = data.get('servingSize')
-    # 实现查询逻辑
-    items = [] # 从数据库查询符合营养需求的食物
-    return JsonResponse(items, safe=False)
