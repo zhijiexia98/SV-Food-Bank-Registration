@@ -133,6 +133,26 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Top Requested Items -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Top Requested Items</h6>
+                        <ul id="topRequestedItems" class="list-group">
+                            <!-- Top requested items will be dynamically populated here -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Your Request History -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Your Request History</h6>
+                        <ul id="requestHistory" class="list-group">
+                            <!-- Request history will be dynamically populated here -->
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!-- Main Content -->
@@ -177,9 +197,11 @@
     <script>
         // 加载页面时获取用户信息
         document.addEventListener('DOMContentLoaded', function () {
-            const uid = getUidFromUrl(); // Get UID from the URL
-            loadUserInfo(uid);           // Pass the UID to the API call
+            const uid = getUidFromUrl();
+            loadUserInfo(uid);
             loadAvailableItems();
+            loadTopRequestedItems();
+            loadRequestHistory(uid);
         });
 
         function getUidFromUrl() {
@@ -279,6 +301,66 @@
                 console.error("Error requesting item:", error);
                 alert("An error occurred while requesting the item.");
             }
+        }
+
+        async function loadTopRequestedItems() {
+            try {
+                const response = await fetch('/api/food/top_requested');
+                const data = await response.json();
+                const list = document.getElementById('topRequestedItems');
+                list.innerHTML = data.top_items.map(item => `<li class="list-group-item">${item.package__package_name}: ${item.total_requested} requests</li>`).join('');
+            } catch (error) {
+                console.error('Error loading top requested items:', error);
+            }
+        }
+
+        async function loadRequestHistory(uid) {
+            try {
+                const response = await fetch(`/api/student/request_history/${uid}`);
+                const data = await response.json();
+                const list = document.getElementById('requestHistory');
+                list.innerHTML = data.request_history.map(req => `<li class="list-group-item">${req.package__package_name}: ${req.amount} requested on ${new Date(req.requested_at).toLocaleDateString()} - ${req.status}</li>`).join('');
+            } catch (error) {
+                console.error('Error loading request history:', error);
+            }
+        }
+
+        function displayItemsByCategory(items) {
+            const grid = document.getElementById('itemsGrid');
+            const groupedItems = items.reduce((acc, item) => {
+                if (!acc[item.category]) acc[item.category] = [];
+                acc[item.category].push(item);
+                return acc;
+            }, {});
+
+            grid.innerHTML = Object.keys(groupedItems).map(category => `
+                <h5>${category}</h5>
+                <div class="row">
+                    ${groupedItems[category].map(item => `
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">${item.package_name}</h5>
+                                    <span class="status-badge bg-${item.quantity > 10 ? 'success' : 'warning'}">
+                                        ${item.quantity} available
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">${item.description}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-utensils"></i> ${item.category}
+                                        </small>
+                                        <button class="btn btn-custom btn-sm" onclick="requestItem(${item.id})">
+                                            Request
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

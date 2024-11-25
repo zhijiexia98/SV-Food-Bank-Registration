@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ValidationError
-from django.db.models import Sum
+from django.db.models import Sum, Count, F
 from datetime import timedelta, timezone
 from django.utils.timezone import now
 from django.conf import settings
@@ -83,7 +83,7 @@ def request_food_item(request, uid):
             if package.quantity > 0:
                 # Create a new request
                 Requests.objects.create(
-                    student_id=user.student_id,  # Use the user's student_id
+                    student_id=user.student_id,
                     package_id=package.id,
                     amount=1,  # Assuming 1 package per request
                     reason="Student requested package",
@@ -176,6 +176,7 @@ def register(request):
                 'balance': 0 if role in ['donor', 'student'] else None,
                 'is_active': True,
                 'created_at': now(),
+                'student_id': nuid if role == 'student' else None,
                 'point': 100,
             }
 
@@ -308,3 +309,45 @@ def filter_donations(request):
     
     donations_data = list(donations.values('donor_id__username', 'amount', 'donated_at'))
     return JsonResponse({'donations': donations_data})
+
+def all_food_packages(request):
+    packages = FoodPackages.objects.annotate(
+        distributed_count=Count('requests'),
+        remaining=F('quantity')
+    ).values('package_name', 'distributed_count', 'remaining')
+    print(packages)
+    return JsonResponse({'packages': list(packages)})
+
+def all_students(request):
+    students = Student.objects.all().values('name', 'nuid', 'point')
+    return JsonResponse({'students': list(students)})
+
+def all_donations(request):
+    donations = Donations.objects.select_related('donor_id').values('donor_id__username', 'amount', 'donated_at')
+    return JsonResponse({'donations': list(donations)})
+
+def student_by_nuid(request):
+    nuid = request.GET.get('nuid')
+    try:
+        student = Student.objects.get(nuid=nuid)
+        return JsonResponse({'student': {'name': student.name, 'nuid': student.nuid, 'point': student.point}})
+    except Student.DoesNotExist:
+        return JsonResponse({'student': None})
+
+def top_requested_items(request):
+    top_items = Requests.objects.values('package__package_name').annotate(
+        total_requested=Sum('amount')
+    ).order_by('-total_requested')[:5]  # Top 5 requested items
+    return JsonResponse({'top_items': list(top_items)})
+
+def student_request_history(request, uid):
+    requests = Requests.objects.filter(student_id=uid).values(
+        'package__package_name', 'amount', 'requested_at', 'status'
+    ).order_by('-requested_at')
+    return JsonResponse({'request_history': list(requests)})
+
+def available_items_by_category(request):
+    items = FoodPackages.objects.filter(quantity__gt=0).values(
+        'category', 'id', 'package_name', 'description', 'quantity', 'price_per_package'
+    ).order_by('category')
+    return JsonResponse({'items_by_category': list(items)})
