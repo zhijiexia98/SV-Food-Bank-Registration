@@ -5,10 +5,12 @@ from django.db.models import Sum
 from datetime import timedelta, timezone
 from django.utils.timezone import now
 from django.conf import settings
-from .models import Users, Student, FoodPackages, Requests, Donations  # 确保模型已正确导入
+from .models import Users, Student, FoodPackages, Requests, Donations  
 import json
 from django.http import JsonResponse
 from django.utils.timezone import now
+from django.utils.dateparse import parse_date
+from django.utils.timezone import make_aware
 # from openai.error import AuthenticationError, RateLimitError, OpenAIError
 
 def fetch_donations(request, user_id):
@@ -292,3 +294,17 @@ def adminHome(request, uid):
     # Use the uid to fetch user-specific data
     user = Users.objects.get(id=uid)
     return render(request, 'adminHome.html', {'user': user})
+
+def filter_donations(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    if start_date and end_date:
+        start_date = parse_date(start_date)
+        end_date = parse_date(end_date) + timedelta(days=1)  # Add one day to include the end date
+        donations = Donations.objects.filter(donated_at__range=(start_date, end_date))
+    else:
+        donations = Donations.objects.all()
+    
+    donations_data = list(donations.values('donor_id__username', 'amount', 'donated_at'))
+    return JsonResponse({'donations': donations_data})
