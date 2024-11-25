@@ -169,42 +169,29 @@
             messageInput.value = '';
             messageInput.focus();
 
+            // Disable the button temporarily
             document.getElementById('send-btn').disabled = true;
 
             fetch('/chatbox/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
                 },
-                body: JSON.stringify({ 'message': userMessage })
+                body: JSON.stringify({ message: userMessage })
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.error || 'An unknown error occurred.');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('send-btn').disabled = false;
-
-                if (data.response) {
-                    appendMessage(data.response, false);
-                } else if (data.error) {
-                    appendMessage(`Error: ${data.error}`, false);
-                } else {
-                    appendMessage('An unexpected error occurred.', false);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                appendMessage(error.message, false);
-                document.getElementById('send-btn').disabled = false;
-            });
+                .then(response => response.json())
+                .then(data => {
+                    appendMessage(data.response || data.error, false);
+                    document.getElementById('send-btn').disabled = false; // Re-enable the button
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    appendMessage('An unexpected error occurred. Please try again later.', false);
+                    document.getElementById('send-btn').disabled = false; // Re-enable the button
+                });
         }
     });
+
 
     document.getElementById('message-input').addEventListener('keypress', function (event) {
         if (event.key === 'Enter' && !event.shiftKey) {

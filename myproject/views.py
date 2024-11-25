@@ -276,10 +276,6 @@ def adminDashboard(request):
 def home(request):
     return render(request, 'home.html')
 
-def chatbox(request):
-    role = request.session.get('role')  # Retrieve user role from session
-    return render(request, 'chatbox.html', {'role': role})
-
 def donation(request, uid):
     # Use the uid to fetch user-specific data
     user = Users.objects.get(id=uid)
