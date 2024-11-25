@@ -90,52 +90,75 @@
         margin-top: 10px;
         /* padding-top: 10px; */
       }
+
+      .role-selection {
+        display: flex;
+        align-items: center;
+        justify-content: space-between; 
+      
+      }
+      
+      .role-option {
+        display: flex;
+        align-items: center;
+        gap: 5px; /* Adjust the gap as needed */
+      }
+
+      .form-group input[type="radio"] {
+        width: 20px;
+      }
     </style>
 
     <script>
       function initializeForm() {
-        const roleSelector = document.getElementById("role");
+        const roleRadios = document.querySelectorAll('input[name="role"]');
         const studentFields = document.getElementById("studentFields");
         const schoolEmailField = document.getElementById("schoolEmail");
         const emailForm = document.getElementById("emailForm");
         const emailField = document.getElementById("email");
 
-        roleSelector.addEventListener("change", () => {
-          const role = roleSelector.value;
+        roleRadios.forEach(radio => {
+            radio.addEventListener("change", () => {
+                const role = document.querySelector('input[name="role"]:checked').value;
 
-          if (role === "student") {
-            studentFields.style.display = "block";
-            emailForm.style.display = "none";
-            schoolEmailField.required = true;
-            schoolEmailField.setAttribute(
-              "pattern",
-              "^[^@\\s]+@northeastern\\.edu$"
-            );
-            schoolEmailField.setAttribute(
-              "title",
-              "Must be a valid Northeastern University email address."
-            );
-            document.getElementById("nuid").required = true;
-            document.getElementById("householdIncome").required = true;
-            document.getElementById("householdNumber").required = true;
+                if (role === "student") {
+                    studentFields.style.display = "block";
+                    emailForm.style.display = "none";
+                    schoolEmailField.required = true;
+                    schoolEmailField.setAttribute(
+                        "pattern",
+                        "^[^@\\s]+@northeastern\\.edu$"
+                    );
+                    schoolEmailField.setAttribute(
+                        "title",
+                        "Must be a valid Northeastern University email address."
+                    );
+                    document.getElementById("nuid").required = true;
+                    document.getElementById("householdIncome").required = true;
+                    document.getElementById("householdNumber").required = true;
 
-            emailField.removeAttribute("pattern");
-            emailField.removeAttribute("title");
-          } else {
-            emailForm.style.display = "block";
-            studentFields.style.display = "none";
-            schoolEmailField.required = false;
+                    emailField.removeAttribute("required");
+                    emailField.removeAttribute("pattern"); 
+                    emailField.removeAttribute("title");
+                    emailField.setAttribute("name", "schoolEmail");
+                } else {
+                    emailForm.style.display = "block";
+                    studentFields.style.display = "none";
+                    schoolEmailField.required = false;
 
-            emailField.setAttribute(
-              "pattern",
-              "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
-            );
-            emailField.setAttribute("title", "Must be a valid email address.");
+                    emailField.setAttribute("required", "true");
+                    emailField.setAttribute(
+                        "pattern",
+                        "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+                    );
+                    emailField.setAttribute("title", "Must be a valid email address.");
+                    emailField.setAttribute("name", "email");
 
-            document.getElementById("nuid").required = false;
-            document.getElementById("householdIncome").required = false;
-            document.getElementById("householdNumber").required = false;
-          }
+                    document.getElementById("nuid").required = false;
+                    document.getElementById("householdIncome").required = false;
+                    document.getElementById("householdNumber").required = false;
+                }
+            });
         });
       }
 
@@ -189,12 +212,27 @@
         <!-- Role Selector -->
         <div class="form-group">
           <label for="role">Role:</label>
-          <select id="role" name="role" required>
+          <!-- <select id="role" name="role" required>
             <option value="">Select your role</option>
             <option value="donor">Donor</option>
             <option value="student">Student</option>
             <option value="admin">Admin</option>
-          </select>
+          </select> -->
+
+          <div class="role-selection">
+              <div class="role-option">
+                  <label for="roleDonor">Donor</label>
+                  <input type="radio" id="roleDonor" name="role" value="donor" required>
+              </div>
+              <div class="role-option">
+                  <label for="roleStudent">Student</label>
+                  <input type="radio" id="roleStudent" name="role" value="student" required>
+              </div>
+              <div class="role-option">
+                  <label for="roleAdmin">Admin</label>
+                  <input type="radio" id="roleAdmin" name="role" value="admin" required>
+              </div>
+          </div>
         </div>
 
         <!-- Email Field -->

@@ -189,12 +189,17 @@
 
         async function loadUserInfo(uid) {
             try {
-                // Corrected URL construction using backticks for template literals
                 const response = await fetch(`/api/student/info/${uid}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error loading user info:', errorText);
+                    return;
+                }
                 const data = await response.json();
+                console.log(data);
                 document.getElementById('studentName').textContent = data.name;
-                document.getElementById('studentId').textContent = data.studentId;
-                document.getElementById('studentPoints').textContent = data.points; // Update points display
+                document.getElementById('studentId').textContent = data.nuid;
+                document.getElementById('studentPoints').textContent = data.point;
             } catch (error) {
                 console.error('Error loading user info:', error);
             }

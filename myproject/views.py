@@ -107,12 +107,13 @@ def student_info(request, uid):
     if request.method == 'GET':
         try:
             user = Users.objects.get(id=uid, role='student')
-            student = Student.objects.get(student_id=user.student_id)
+            student = Student.objects.get(user=user)
             return JsonResponse({
                 'name': student.name,
-                'studentId': student.student_id,
-                'points': student.point,
+                'nuid': student.nuid,
+                'point': student.point,
             })
+
         except Users.DoesNotExist:
             return JsonResponse({'error': 'Student not found'}, status=404)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -170,15 +171,24 @@ def register(request):
                 'password': password,
                 'role': role,
                 'phone': phone,
-                'balance': 0 if role in ['donor', 'student'] else None,  # Balance for donors and students
+                'balance': 0 if role in ['donor', 'student'] else None,
                 'is_active': True,
                 'created_at': now(),
-                'point': 0,  # Default point value
-                'student_id': nuid if role == 'student' else None  # Assign NUID for students
+                'point': 100,
             }
 
             # Save user to database
             user = Users.objects.create(**user_data)
+
+            # If the role is student, create a Student record
+            if role == 'student':
+                Student.objects.create(
+                    user=user,
+                    nuid=nuid,
+                    name=name,
+                    email=email,
+                    point=0
+                )
 
             localhost = 'http://localhost:8000'
             redirect_url = localhost
@@ -237,7 +247,7 @@ def adminDashboard(request):
 
         # Get student points
         students = Users.objects.filter(role='student').values(
-            'username', 'point', 'student_id'
+            'name', 'point', 'nuid'
         )
 
         # Get distribution history
