@@ -28,6 +28,9 @@ urlpatterns = [
     path('profile/edit/', views.register),
     path('', lambda request: redirect('home/', permanent=False)),
     path('chatbox/', views.chatbox, name='chatbox'),
+    path('donation/<int:uid>/', views.donation, name='donation'),
+    path('studentHome/<int:uid>/', views.studentHome, name='studentHome'),
+    path('adminHome/<int:uid>/', views.adminHome, name='adminHome'),
 
 ]
 

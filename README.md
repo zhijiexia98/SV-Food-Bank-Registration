@@ -8,5 +8,6 @@ To run the app locally
         - pip install django
         - pip install mysqlclient
         - pip install mysql-connector-python
+        - pip install cryptography
         - pip install PyMySQL
 - python manage.py runserver (run the app)
