@@ -94,11 +94,17 @@
                 </div>
             </div>
 
-            <!-- Distribution History -->
+            <div class="filter-section">
+                <input type="date" id="startDate" placeholder="Start Date">
+                <input type="date" id="endDate" placeholder="End Date">
+                <button id="filterButton">Filter Donations</button>
+            </div>
+
+            <!-- Donation History -->
             <div class="col-12">
                 <div class="card dashboard-card">
                     <div class="card-header">
-                        <h5>Distribution History</h5>
+                        <h5>Donation History</h5>
                     </div>
                     <div class="card-body">
                         <div id="distributionHistory"></div>
@@ -107,6 +113,8 @@
             </div>
         </div>
     </div>
+
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -136,6 +144,61 @@
             const distributionHistory = document.getElementById('distributionHistory');
             distributionHistory.innerHTML = createDistributionHistoryHTML(data.distributions);
         }
+        
+        function createDistributionHistoryHTML(distributions) {
+            if (!distributions || distributions.length === 0) {
+                return '<p>No distribution history available.</p>';
+            }
+
+            let html = '<ul>';
+            distributions.forEach(distribution => {
+                html += `<li>${distribution.donor_id__username} donated ${distribution.amount} on ${new Date(distribution.donated_at).toLocaleDateString()}</li>`;
+            });
+            html += '</ul>';
+
+            return html;
+        }
+
+        function createPackageStatsHTML(packages) {
+            if (!packages || packages.length === 0) {
+                return '<p>No package statistics available.</p>';
+            }
+
+            let html = '<ul>';
+            packages.forEach(pkg => {
+                html += `<li>${pkg.package_name}: ${pkg.distributed_count} distributed, ${pkg.remaining} remaining</li>`;
+            });
+            html += '</ul>';
+
+            return html;
+        }
+
+        function createStudentPointsHTML(students) {
+            if (!students || students.length === 0) {
+                return '<p>No student points data available.</p>';
+            }
+
+            let html = '<ul>';
+            students.forEach(student => {
+                html += `<li>${student.name} (ID: ${student.nuid}): ${student.point} points</li>`;
+            });
+            html += '</ul>';
+
+            return html;
+        }
+
+        document.getElementById('filterButton').addEventListener('click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            fetch(`/api/admin/filter_donations?start_date=${startDate}&end_date=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const distributionHistory = document.getElementById('distributionHistory');
+                    distributionHistory.innerHTML = createDistributionHistoryHTML(data.donations);
+                })
+                .catch(error => console.error('Error fetching filtered data:', error));
+        });
     </script>
 </body>
 </html>

@@ -37,6 +37,9 @@ urlpatterns = [
     path("request/<int:uid>/", views.request_food_item, name="request_food_item"),
     path("donor/<int:user_id>/", views.fetch_donations, name="fetch_donations"),
     path("donor/<int:user_id>/submit/", views.submit_donation, name="submit_donation"),
+    path('api/admin/filter_donations', views.filter_donations, name='filter_donations'),
+    path('api/admin/dashboard', views.adminDashboard, name='adminDashboard'),
+
 ]
 
 

@@ -72,14 +72,15 @@ class Requests(models.Model):
 
 
 class Student(models.Model):
-    student_id = models.AutoField(primary_key=True)
+    user = models.OneToOneField('Users', on_delete=models.CASCADE, primary_key=True)
+    nuid = models.CharField(max_length=10)
     name = models.CharField(max_length=255)
     email = models.CharField(unique=True, max_length=255)
     point = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        # managed = False
         db_table = 'student'
+        unique_together = (('user', 'nuid'),)
 
 
 class Users(models.Model):
