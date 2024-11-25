@@ -39,6 +39,10 @@ urlpatterns = [
     path("donor/<int:user_id>/submit/", views.submit_donation, name="submit_donation"),
     path('api/admin/filter_donations', views.filter_donations, name='filter_donations'),
     path('api/admin/dashboard', views.adminDashboard, name='adminDashboard'),
+    path('api/admin/all_food_packages', views.all_food_packages, name='all_food_packages'),
+    path('api/admin/all_students', views.all_students, name='all_students'),
+    path('api/admin/all_donations', views.all_donations, name='all_donations'),
+    path('api/admin/student_by_nuid', views.student_by_nuid, name='student_by_nuid'),
 
 ]
 
