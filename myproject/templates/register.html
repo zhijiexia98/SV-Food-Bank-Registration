@@ -139,13 +139,45 @@
         });
       }
 
-      document.addEventListener("DOMContentLoaded", initializeForm);
+      document.addEventListener("DOMContentLoaded", function() {
+          initializeForm();
+          console.log("registerForm", document.getElementById('registrationForm'));
+
+          document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              console.log("formData", formData);
+              
+              try {
+                  const response = await fetch('/register/', {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                      },
+                      body: formData
+                  });
+                  
+                  const data = await response.json();
+                  console.log("data", data);
+
+                  if (data.success) {
+                      console.log(data.redirect);
+                      window.location.href = data.redirect;
+                  } else {
+                      alert(data.message || 'Registration failed');
+                  }
+              } catch (error) {
+                  console.error('Error:', error);
+                  alert('An error occurred during registration');
+              }
+          });
+      });
     </script>
   </head>
   <body>
     <div class="login-card">
       <h2>User Registration</h2>
-      <form method="POST" action="/register/">
+      <form id="registrationForm" method="POST" action="/register/">
         {% csrf_token %}
 
         <!-- Name Field -->

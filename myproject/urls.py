@@ -31,7 +31,7 @@ urlpatterns = [
     path('donation/<int:uid>/', views.donation, name='donation'),
     path('studentHome/<int:uid>/', views.studentHome, name='studentHome'),
     path('adminHome/<int:uid>/', views.adminHome, name='adminHome'),
-
+    path('api/admin/dashboard/', views.adminDashboard, name='adminDashboard'),
 ]
 
 
