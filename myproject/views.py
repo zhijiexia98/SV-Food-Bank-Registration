@@ -2,14 +2,14 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ValidationError
 from django.db.models import Sum
-from datetime import timedelta
+from datetime import timedelta, timezone
 from django.utils.timezone import now
 from django.conf import settings
-import openai
 from .models import Users, Student, FoodPackages, Requests, Donations  # 确保模型已正确导入
 import json
 from django.http import JsonResponse
 from django.utils.timezone import now
+# from openai.error import AuthenticationError, RateLimitError, OpenAIError
 
 def fetch_donations(request, user_id):
     try:
@@ -141,18 +141,7 @@ def search_food_items(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
-# 封装 GPT API 调用函数
-def call_gpt_api(prompt, max_tokens=150):
-    try:
-        openai.api_key = settings.OPENAI_API_KEY
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            max_tokens=max_tokens
-        )
-        return response.choices[0].text.strip()
-    except Exception as e:
-        return f"Error: {str(e)}"
+
 
 
 # 用户注册
@@ -191,7 +180,21 @@ def register(request):
             # Save user to database
             user = Users.objects.create(**user_data)
 
-            return JsonResponse({'success': True, 'message': f"Registration successful for {name} with role: {role}."})
+            localhost = 'http://localhost:8000'
+            redirect_url = localhost
+            if role == 'student':
+                redirect_url = f'{localhost}/studentHome/{user.id}/'
+            elif role == 'donor':
+                redirect_url = f'{localhost}/donation/{user.id}/'
+            elif role == 'admin':
+                redirect_url = f'{localhost}/adminHome/{user.id}/'
+                
+            return JsonResponse({
+                'success': True,
+                'message': f"Registration successful for {name} with role: {role}.",
+                'redirect': redirect_url,
+                'uid': user.id
+            })
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
@@ -224,7 +227,39 @@ def login(request):
 
     return render(request, 'login.html')
 
+def adminDashboard(request):
+    try:
+        # Get package statistics
+        packages = FoodPackages.objects.annotate(
+            distributed_count=Count('requests'),
+            remaining=F('quantity')
+        ).values('package_name', 'distributed_count', 'remaining')
 
+        # Get student points
+        students = Users.objects.filter(role='student').values(
+            'username', 'point', 'student_id'
+        )
+
+        # Get distribution history
+        distributions = Requests.objects.select_related(
+            'student', 'package'
+        ).filter(
+            status='approved'
+        ).values(
+            'student__username',
+            'package__package_name',
+            'requested_at',
+            'amount'
+        ).order_by('-requested_at')[:50]
+
+        return JsonResponse({
+            'packages': list(packages),
+            'students': list(students),
+            'distributions': list(distributions)
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
 # Home 页面
 def home(request):
     return render(request, 'home.html')
@@ -247,129 +282,3 @@ def adminHome(request, uid):
     # Use the uid to fetch user-specific data
     user = Users.objects.get(id=uid)
     return render(request, 'adminHome.html', {'user': user})
-
-# API endpoints for food queries
-def food_dietary(request):
-    restriction = request.GET.get('restriction')
-    # 实现查询逻辑
-    items = [] # 从数据库查询符合条件的食物
-    return JsonResponse(items, safe=False)
-
-def food_allergies(request):
-    allergies = json.loads(request.body).get('allergies', [])
-    # 实现查询逻辑
-    items = [] # 从数据库查询不含过敏原的食物
-    return JsonResponse(items, safe=False)
-
-def food_nutrition(request):
-    data = json.loads(request.body)
-    nutrient_type = data.get('nutrientType')
-    serving_size = data.get('servingSize')
-    # 实现查询逻辑
-    items = [] # 从数据库查询符合营养需求的食物
-    return JsonResponse(items, safe=False)
-
-# Donor: 获取捐赠建议
-def donor_suggestion(request, donor_id):
-    try:
-        donor = Users.objects.get(id=donor_id, role='donor')
-        balance = donor.balance
-        prompt = f"The donor's current balance is ${balance}. Suggest an optimal donation amount for food packages, considering the balance should not drop below $50."
-        suggestion = call_gpt_api(prompt, max_tokens=50)
-        return JsonResponse({'donor_id': donor_id, 'balance': balance, 'suggestion': suggestion})
-    except Users.DoesNotExist:
-        return JsonResponse({'error': 'Donor not found'}, status=404)
-
-
-# Student: 推荐食品包
-def student_recommendation(request, student_id):
-    try:
-        student = Users.objects.get(id=student_id, role='student')
-        food_packages = FoodPackages.objects.filter(quantity__gt=0)
-        package_list = "\n".join(
-            [f"Package: {pkg.package_name}, Description: {pkg.description}, Price: ${pkg.price_per_package}, Quantity: {pkg.quantity}"
-             for pkg in food_packages]
-        )
-        last_request = Requests.objects.filter(student_id=student_id).order_by('-requested_at').first()
-        reason = last_request.reason if last_request else "No previous requests"
-        prompt = f"Available food packages:\n{package_list}\nThe student is requesting for: \"{reason}\". Suggest the best package for the student."
-        recommendation = call_gpt_api(prompt, max_tokens=100)
-        return JsonResponse({'student_id': student_id, 'recommendation': recommendation})
-    except Users.DoesNotExist:
-        return JsonResponse({'error': 'Student not found'}, status=404)
-
-
-# Admin: 请求优先级排序
-def admin_prioritize_requests(request):
-    pending_requests = Requests.objects.filter(status='pending')
-    if not pending_requests.exists():
-        return JsonResponse({'priority_order': 'No pending requests.'})
-    requests_list = "\n".join(
-        [f"Student: {req.student.username}, Package: {req.package.package_name}, Amount: {req.amount}, Reason: {req.reason}, Requested at: {req.requested_at}"
-         for req in pending_requests]
-    )
-    prompt = f"Below are pending food package requests. Prioritize the requests based on urgency and fairness:\n{requests_list}"
-    priority_order = call_gpt_api(prompt, max_tokens=200)
-    return JsonResponse({'priority_order': priority_order})
-
-
-# 数据总结和可视化建议
-def data_summary_visualization(request):
-    donations_summary = Donations.objects.aggregate(
-        total_donations=Sum('amount'),
-        donation_count=Sum('id')  # 捐赠次数
-    )
-    total_donations = donations_summary.get('total_donations', 0)
-    donation_count = donations_summary.get('donation_count', 0)
-    package_distribution = FoodPackages.objects.all().values('package_name').annotate(
-        total_distributed=Sum('quantity')
-    )
-    distribution_details = "\n".join(
-        [f"{pkg['package_name']}: {pkg['total_distributed']} units" for pkg in package_distribution]
-    )
-    prompt = f"In the last month, the total donations amounted to ${total_donations} from {donation_count} donors. Below are the food packages distributed:\n{distribution_details}\nGenerate a natural language summary and suggest the best visualization type for this data."
-    summary = call_gpt_api(prompt)
-    return JsonResponse({'summary': summary})
-
-
-# 库存预测
-def inventory_forecast(request):
-    last_week = now() - timedelta(days=7)
-    package_distribution = Requests.objects.filter(
-        status='approved',
-        requested_at__gte=last_week
-    ).values('package_id').annotate(
-        total_requested=Sum('amount')
-    )
-    if not package_distribution.exists():
-        return JsonResponse({'forecast': 'No data available for forecast.'})
-    package_data = "\n".join(
-        [f"Package ID: {pkg['package_id']}, Requested: {pkg['total_requested']} times in the last week" for pkg in package_distribution]
-    )
-    prompt = f"Based on the historical distribution data of food packages in the last week:\n{package_data}\nPredict the demand for each package in the next 7 days."
-    forecast = call_gpt_api(prompt)
-    return JsonResponse({'forecast': forecast})
-
-
-# 个性化通知生成
-def personalized_notification(request, user_id):
-    try:
-        user = Users.objects.get(id=user_id)
-        if user.role == 'donor':
-            donations = Donations.objects.filter(donor_id=user_id)
-            donation_details = "\n".join(
-                [f"Amount: ${donation.amount}, Date: {donation.donated_at}" for donation in donations]
-            )
-            prompt = f"Donor {user.username} has made the following donations:\n{donation_details}\nGenerate a thank-you notification summarizing their contributions."
-        elif user.role == 'student':
-            requests = Requests.objects.filter(student_id=user_id)
-            request_details = "\n".join(
-                [f"Package: {req.package.package_name}, Status: {req.status}, Requested on: {req.requested_at}" for req in requests]
-            )
-            prompt = f"Student {user.username} has made the following requests:\n{request_details}\nGenerate a notification summarizing their approved requests and thanking them for their patience."
-        else:
-            return JsonResponse({'error': 'Notifications only available for donors and students.'})
-        notification = call_gpt_api(prompt)
-        return JsonResponse({'notification': notification})
-    except Users.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)

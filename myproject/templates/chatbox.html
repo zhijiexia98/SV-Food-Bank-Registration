@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbox - NU Food Bank</title>
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        /* Existing CSS styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -60,6 +64,10 @@
             border-radius: 50%;
             margin-right: 10px;
         }
+        .chat-message.user img {
+            margin-left: 10px;
+            margin-right: 0;
+        }
         .chat-message p {
             background-color: #f1f1f1;
             padding: 10px 15px;
@@ -80,6 +88,7 @@
             border-radius: 20px;
             padding: 10px;
             border: 1px solid #ddd;
+            resize: none;
         }
         .input-section button {
             margin-left: 10px;
@@ -90,13 +99,17 @@
             padding: 10px 20px;
             cursor: pointer;
         }
+        .input-section button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="chat-header">
         <h2>Chatbox - NU Food Bank</h2>
-        <p>Role: <strong id="user-role">Student</strong></p>
+        <p>Role: <strong id="user-role">{{ role }}</strong></p>
         <i class="fas fa-user-circle profile-icon" id="profile-icon" title="Go to Profile"></i>
     </div>
     <div class="chat-box" id="chat-box">
@@ -108,14 +121,15 @@
     </div>
 </div>
 
+<!-- Include jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    const userRole = "Student"; // Replace with dynamic role from backend
+    const userRole = "{{ role }}";
     document.getElementById('user-role').innerText = userRole;
 
     // Redirect to the profile page when the profile icon is clicked
     document.getElementById('profile-icon').addEventListener('click', () => {
-        window.location.href = '/profile/'; // Update this path to the actual profile page URL
+        window.location.href = '/profile/';
     });
 
     function appendMessage(message, isUser = true) {
@@ -123,11 +137,28 @@
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
         messageDiv.innerHTML = `
-        <img src="${isUser ? '/static/images/user.png' : '/static/images/bot.png'}" alt="${isUser ? 'User' : 'Bot'}">
-        <p>${message}</p>
-      `;
+            ${isUser ? '' : `<img src="{% static 'images/bot.png' %}" alt="Bot">`}
+            <p>${message}</p>
+            ${isUser ? `<img src="{% static 'images/user.png' %}" alt="User">` : ''}
+        `;
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
     document.getElementById('send-btn').addEventListener('click', () => {
@@ -136,11 +167,49 @@
         if (userMessage) {
             appendMessage(userMessage, true);
             messageInput.value = '';
+            messageInput.focus();
 
-            // Simulate bot response
-            setTimeout(() => {
-                appendMessage("This is a simulated bot response.", false);
-            }, 1000);
+            document.getElementById('send-btn').disabled = true;
+
+            fetch('/chatbox/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ 'message': userMessage })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.error || 'An unknown error occurred.');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('send-btn').disabled = false;
+
+                if (data.response) {
+                    appendMessage(data.response, false);
+                } else if (data.error) {
+                    appendMessage(`Error: ${data.error}`, false);
+                } else {
+                    appendMessage('An unexpected error occurred.', false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                appendMessage(error.message, false);
+                document.getElementById('send-btn').disabled = false;
+            });
+        }
+    });
+
+    document.getElementById('message-input').addEventListener('keypress', function (event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            document.getElementById('send-btn').click();
         }
     });
 </script>

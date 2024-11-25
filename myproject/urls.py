@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect  # Import redirect
-from myproject import views  # Import your views
+from myproject import chatbox, views  # Import your views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
