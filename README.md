@@ -9,5 +9,7 @@ To run the app locally
         - pip install mysqlclient
         - pip install mysql-connector-python
         - pip install cryptography
+        - pip install python-dotenv
+        - pip install openai
         - pip install PyMySQL
 - python manage.py runserver (run the app)

@@ -180,7 +180,21 @@ def register(request):
             # Save user to database
             user = Users.objects.create(**user_data)
 
-            return JsonResponse({'success': True, 'message': f"Registration successful for {name} with role: {role}."})
+            localhost = 'http://localhost:8000'
+            redirect_url = localhost
+            if role == 'student':
+                redirect_url = f'{localhost}/studentHome/{user.id}/'
+            elif role == 'donor':
+                redirect_url = f'{localhost}/donation/{user.id}/'
+            elif role == 'admin':
+                redirect_url = f'{localhost}/adminHome/{user.id}/'
+                
+            return JsonResponse({
+                'success': True,
+                'message': f"Registration successful for {name} with role: {role}.",
+                'redirect': redirect_url,
+                'uid': user.id
+            })
 
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
@@ -213,7 +227,39 @@ def login(request):
 
     return render(request, 'login.html')
 
+def adminDashboard(request):
+    try:
+        # Get package statistics
+        packages = FoodPackages.objects.annotate(
+            distributed_count=Count('requests'),
+            remaining=F('quantity')
+        ).values('package_name', 'distributed_count', 'remaining')
 
+        # Get student points
+        students = Users.objects.filter(role='student').values(
+            'username', 'point', 'student_id'
+        )
+
+        # Get distribution history
+        distributions = Requests.objects.select_related(
+            'student', 'package'
+        ).filter(
+            status='approved'
+        ).values(
+            'student__username',
+            'package__package_name',
+            'requested_at',
+            'amount'
+        ).order_by('-requested_at')[:50]
+
+        return JsonResponse({
+            'packages': list(packages),
+            'students': list(students),
+            'distributions': list(distributions)
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
 # Home 页面
 def home(request):
     return render(request, 'home.html')
