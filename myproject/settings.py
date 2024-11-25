@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,7 +21,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Use 'staticfiles' for deployment compatibility
 
-# OPENAI_API_KEY = "sk-y4o2eLlpLl79o1jsSoWLmS4IV3drCEaFmURHoUHMNhT3BlbkFJkppCp0vYOXuvBaq-qUnihHvxnvl2kRNZ4YteDUEHEA"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Quick-start development settings - unsuitable for production
@@ -82,14 +84,12 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'foodbank',
-        'USER': 'dbuser',
-        'PASSWORD': 'Cs5200!pass',
-        'HOST': '35.212.172.227',
-        'PORT': '3306',
-        #'OPTIONS': {
-        #    'ssl': {}
-        #}
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+
     }
 }
 
