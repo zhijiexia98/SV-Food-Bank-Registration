@@ -24,8 +24,10 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
     path('home/', views.home),
-    path('profile/', views.register),
-    path('profile/edit/', views.register),
+    path('studentHome/<int:uid>/profile/', views.register),
+    path('studentHome/<int:uid>/profile/edit/', views.register, name="student_profile_edit"),
+    path('donation/<int:uid>/profile/', views.register),
+    path('donation/<int:uid>/profile/edit/', views.register, name="donor_profile_edit"),
     path('', lambda request: redirect('home/', permanent=False)),
     path('chatbox/', chatbox.chatbox_view, name='chatbox'),
     path('donation/<int:uid>/', views.donation, name='donation'),  # Dynamic UID

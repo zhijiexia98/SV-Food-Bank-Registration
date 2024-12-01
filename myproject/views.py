@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.utils.timezone import now
 from django.utils.dateparse import parse_date
 from django.utils.timezone import make_aware
+from django.shortcuts import get_object_or_404
 # from openai.error import AuthenticationError, RateLimitError, OpenAIError
 
 def fetch_donations(request, user_id):
@@ -144,19 +145,50 @@ def search_food_items(request):
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
-
-
-
-# 用户注册
-def register(request):
+def register(request, uid=None):
     if request.method == "POST":
         try:
+            # print(f"Received UID: {uid}")
+            # print(f"Request path: {request.path}")
+            # print(f"POST data: {request.POST}")
+            if uid:
+                user = get_object_or_404(Users, id=uid)
+                
+                # Update fields
+                user.username = request.POST.get('name', user.username)
+                user.email = request.POST.get('email', user.email) or request.POST.get('schoolEmail', user.email)
+                user.role = request.POST.get('role', user.role)
+                user.phone = request.POST.get('phone', user.phone)
+                user.password = request.POST.get('password', user.password)
+                # user.address = request.POST.get('address', user.address)
+                if user.role == 'student':
+                    user.student_id = request.POST.get('nuid', user.student_id)
+                user.save()
+
+                user_data = {
+                    'username': user.username,
+                    'email': user.email,
+                    'password': user.password,
+                    'role': user.role,
+                    'phone': user.phone,
+                    'balance': 0 if user.role in ['donor', 'student'] else None,  # Balance for donors and students
+                    'is_active': True,
+                    'point': user.point,  # Default point value
+                    'student_id': user.student_id if user.role == 'student' else None  # Assign NUID for students
+                }
+
+                return JsonResponse({
+                    'success': True,
+                    'message': f"Profile updated successfully for {user.username}.",
+                    'uid': user.id,
+                    'user_data': user_data
+                })
             # Get common fields
             name = request.POST.get('name')
             email = request.POST.get('email', None) or request.POST.get('schoolEmail', None)
             password = request.POST.get('password')
             role = request.POST.get('role')
-            address = request.POST.get('address', None)
+            # address = request.POST.get('address', None)
             phone = request.POST.get('phone', None)
 
             # Role-specific fields
@@ -210,7 +242,7 @@ def register(request):
             })
 
         except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+            return JsonResponse({'success': False, 'message': str(e), 'uid': uid}, status=500)
 
     return render(request, 'register.html')
 
@@ -228,11 +260,16 @@ def login(request):
             # Check user credentials
             try:
                 user = Users.objects.get(email=email, password=password)
-                return JsonResponse({
+                user_data = {
                     "uid": user.id,
                     "name": user.username,
+                    "email": user.email,
                     "role": user.role,
-                })
+                    "phone": user.phone,
+                    "student_id": getattr(user, 'student_id', None),
+                    "password": password,
+                }
+                return JsonResponse({"success": True, "data": user_data})
             except Users.DoesNotExist:
                 return JsonResponse({"error": "Invalid credentials."}, status=401)
         except json.JSONDecodeError:
