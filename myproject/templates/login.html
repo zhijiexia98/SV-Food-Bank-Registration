@@ -120,13 +120,18 @@
               body: JSON.stringify({ email, password }),
             });
 
-            const data = await response.json();
+            const res = await response.json();
+            console.log(res.success);
 
-            if (response.ok) {
+            if (res.success) {
+              console.log(res.data);
               // Store user info in sessionStorage
-              const { uid, name, role } = data;
+              sessionStorage.setItem("user_data", JSON.stringify(res.data));
+              const { uid, name, role } = res.data;
+              console.log(uid, name, role);
               sessionStorage.setItem("uid", uid);
               sessionStorage.setItem("name", name);
+              
 
               // Redirect based on user role
               if (role === "student") {
@@ -136,6 +141,7 @@
               } else if (role === "admin") {
                 window.location.href = `/adminHome/${uid}/`; // Dynamic route
               }
+              
             } else {
               // Display error message if login fails
               errorMessage.textContent =

@@ -9,6 +9,20 @@
       rel="stylesheet"
     />
     <style>
+      :root {
+        --primary-color: #c41e3a;
+        --secondary-color: #242424;
+        --bg-light: #f8f9fa;
+      }
+
+      .navbar-custom {
+        background-color: var(--primary-color);
+      }
+
+      .nav-link {
+        color: white !important;
+      }
+
       body {
         font-family: "Roboto", sans-serif;
         background: linear-gradient(120deg, #e3f2fd, #f1f8e9);
@@ -65,7 +79,7 @@
       }
 
       .btn-submit {
-        background: linear-gradient(45deg, #272b34, #4a69bd);
+        background: var(--primary-color);
         color: white;
         font-weight: bold;
         border: none;
@@ -77,7 +91,7 @@
       }
 
       .btn-submit:hover {
-        background: linear-gradient(45deg, #6a89cc, #272b34);
+        background: var(--primary-color);
         transform: scale(1.05);
       }
 
@@ -110,6 +124,18 @@
     </style>
 
     <script>
+      function setInitialRole(role) {
+        const roleRadio = document.querySelector(`input[name="role"][value="${role}"]`);
+        if (roleRadio) {
+          roleRadio.checked = true;
+        }
+      }
+
+      function getSelectedRole() {
+        const selectedRadio = document.querySelector('input[name="role"]:checked');
+        return selectedRadio ? selectedRadio.value : null;
+      }
+
       function initializeForm() {
         const roleRadios = document.querySelectorAll('input[name="role"]');
         const studentFields = document.getElementById("studentFields");
@@ -119,7 +145,7 @@
 
         roleRadios.forEach(radio => {
             radio.addEventListener("change", () => {
-                const role = document.querySelector('input[name="role"]:checked').value;
+                const role = getSelectedRole();
 
                 if (role === "student") {
                     studentFields.style.display = "block";
@@ -162,44 +188,193 @@
         });
       }
 
-      document.addEventListener("DOMContentLoaded", function() {
-          initializeForm();
-          console.log("registerForm", document.getElementById('registrationForm'));
+      // function initializePage() {
+      //   const currentUrl = window.location.pathname;
+      //   const uid = currentUrl.split("/")[2]; // Extract UID from URL
+      //   const isEditPage = currentUrl.endsWith("/profile/edit/");
 
-          document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+      //   if (isEditPage) {
+      //     fetchUserData(uid); // Populate fields for editing
+      //
+      //   } else {
+      //     fetchUserData(uid); // View-only mode
+      //   }
+      // }
+
+      function initializeProfilePage(isEditPage) {
+        const currentUrl = window.location.pathname;
+        const uid = sessionStorage.getItem("uid");
+        const formFields = document.querySelectorAll("input, select");
+        const submitButton = document.getElementById("submitButton");
+        const title = document.getElementById("pageTitle");
+        
+        if (!isEditPage) {
+          console.log("profile page");
+
+          fetchUserData();
+          // Set fields to read-only
+          formFields.forEach((field) => {
+            field.readOnly = true;
+            field.disabled = true;
+          });
+          title.innerText = "Profile";
+          // Change the button text to "Edit"
+          submitButton.textContent = "Edit";
+          submitButton.type = "button"; // Prevent form submission
+          // Set up click handler for edit mode
+          submitButton.onclick = () => {
+            window.location.href = currentUrl + "edit/";
+          };
+        } else {
+          title.innerText = "Edit Profile";
+          fetchUserData();
+          const role = getSelectedRole();
+          let url = "";
+          switch (role) {
+            case "student":
+              url = "studentHome";
+              break;
+            case "donor":
+              url = "donation";
+              break;
+            default:
+              url = "adminHome";
+              // return; // Exit if the role is invalid
+          }
+          console.log("edit page");
+          console.log("uid", uid);
+          // Enable editing
+          formFields.forEach((field) => {
+            field.readOnly = false;
+            field.disabled = false; // Enable select elements
+          });
+          // Change the button text to "Submit"
+          submitButton.textContent = "Submit";
+          // Set up the form for submission
+          submitButton.type = "submit";
+          document
+            .getElementById("registrationForm").action=`/${url}/${uid}/profile/edit/`;
+          document
+            .getElementById("registrationForm")
+            .addEventListener("submit", async (e) => {
               e.preventDefault();
               const formData = new FormData(e.target);
-              console.log("formData", formData);
-              
-              try {
-                  const response = await fetch('/register/', {
-                      method: 'POST',
-                      headers: {
-                          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                      },
-                      body: formData
-                  });
-                  
-                  const data = await response.json();
-                  console.log("data", data);
+              updateUserData(formData, url, uid);
+            });
+        }
+      }
 
-                  if (data.success) {
-                      console.log(data.redirect);
-                      window.location.href = data.redirect;
-                  } else {
-                      alert(data.message || 'Registration failed');
-                  }
-              } catch (error) {
-                  console.error('Error:', error);
-                  alert('An error occurred during registration');
-              }
+      async function fetchUserData() {
+        try {
+          let userData = sessionStorage.getItem("user_data");
+          if (userData) {
+            userData = JSON.parse(userData);
+            // Populate form fields with user data
+            document.getElementById("name").value = userData.name;
+            setInitialRole(userData.role);
+            // document.getElementById("role").value = userData.role;
+            document.getElementById("email").value = userData.email;
+            document.getElementById("password").value = userData.password;
+
+            if (userData.role === "student") {
+              const studentFields = document.getElementById("studentFields");
+              studentFields.style.display = "block";
+              emailForm.style.display = "none";
+              document.getElementById("schoolEmail").value =
+                userData.schoolEmail || userData.email;
+              document.getElementById("nuid").value = userData.student_id;
+              // Toggle student fields visibility
+            } else {
+              document.getElementById("email").value = userData.email;
+            }
+          } else {
+            alert(result.message || "Failed to fetch profile data.");
+            window.location.href = "/login/";
+          }
+        } catch (error) {
+          console.error("Error fetching profile data:", error);
+        }
+      }
+
+      async function updateUserData(formData, url, uid) {
+        // const formData = new FormData(
+        //   document.getElementById("registrationForm")
+        // );
+        try {
+          const urlPath = `/${url}/${uid}/profile/edit/`; // Ensure URL is correctly formed
+          console.log("Fetch URL:", urlPath);
+
+          const response = await fetch(urlPath, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: formData,
           });
+          const result = await response.json();
+          if (result.success) {
+            alert("Profile updated successfully!");
+            console.log(result.user_data)
+            sessionStorage.setItem("user_data", JSON.stringify(result.user_data))
+            window.location.href = `/${url}/${uid}/profile/`;
+          } else {
+            alert(result.message || "Failed to update profile.");
+          }
+        } catch (error) {
+          console.error("Error updating profile:", error);
+        }
+      }
+
+      async function newUserData(formData) {
+        try {
+          const response = await fetch('/register/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: formData
+          });
+
+          const data = await response.json();
+          console.log("data", data);
+
+          if (data.success) {
+            console.log(data.redirect);
+            window.location.href = data.redirect;
+          } else {
+            alert(data.message || 'Registration failed');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred during registration');
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const currentUrl = window.location.pathname;
+        const isProfilePage = currentUrl.endsWith("/profile/");
+        const isEditPage = currentUrl.endsWith("/profile/edit/");
+
+        initializeForm();
+
+        if (!isEditPage && !isProfilePage) {
+          document
+            .getElementById("registrationForm")
+            .addEventListener("submit", async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              newUserData(formData);
+            });
+        } else {
+          initializeProfilePage(isEditPage);
+        }
       });
     </script>
   </head>
+      
   <body>
     <div class="login-card">
-      <h2>User Registration</h2>
+      <h2 id="pageTitle">User Registration</h2>
       <form id="registrationForm" method="POST" action="/register/">
         {% csrf_token %}
 
@@ -301,7 +476,9 @@
         </div>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn-submit">Submit</button>
+        <button type="submit" class="btn-submit" id="submitButton">
+          Submit
+        </button>
       </form>
     </div>
   </body>
