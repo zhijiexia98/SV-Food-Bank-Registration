@@ -124,6 +124,18 @@
     </style>
 
     <script>
+      function setInitialRole(role) {
+        const roleRadio = document.querySelector(`input[name="role"][value="${role}"]`);
+        if (roleRadio) {
+          roleRadio.checked = true;
+        }
+      }
+
+      function getSelectedRole() {
+        const selectedRadio = document.querySelector('input[name="role"]:checked');
+        return selectedRadio ? selectedRadio.value : null;
+      }
+
       function initializeForm() {
         const roleRadios = document.querySelectorAll('input[name="role"]');
         const studentFields = document.getElementById("studentFields");
@@ -133,23 +145,8 @@
 
         roleRadios.forEach(radio => {
             radio.addEventListener("change", () => {
-                const role = document.querySelector('input[name="role"]:checked').value;
+                const role = getSelectedRole();
 
-          if (role === "student") {
-            studentFields.style.display = "block";
-            emailForm.style.display = "none";
-            schoolEmailField.required = true;
-            schoolEmailField.setAttribute(
-              "pattern",
-              "^[^@\\s]+@northeastern\\.edu$"
-            );
-            schoolEmailField.setAttribute(
-              "title",
-              "Must be a valid Northeastern University email address."
-            );
-            document.getElementById("nuid").required = true;
-            // document.getElementById("householdIncome").required = true;
-            // document.getElementById("householdNumber").required = true;
                 if (role === "student") {
                     studentFields.style.display = "block";
                     emailForm.style.display = "none";
@@ -231,9 +228,9 @@
         } else {
           title.innerText = "Edit Profile";
           fetchUserData();
-          const role = document.getElementById("role");
+          const role = getSelectedRole();
           let url = "";
-          switch (role.value) {
+          switch (role) {
             case "student":
               url = "studentHome";
               break;
@@ -273,8 +270,9 @@
           if (userData) {
             userData = JSON.parse(userData);
             // Populate form fields with user data
-            document.getElementById("name").value = userData.username;
-            document.getElementById("role").value = userData.role;
+            document.getElementById("name").value = userData.name;
+            setInitialRole(userData.role);
+            // document.getElementById("role").value = userData.role;
             document.getElementById("email").value = userData.email;
             document.getElementById("password").value = userData.password;
 

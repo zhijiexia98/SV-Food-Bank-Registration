@@ -166,7 +166,7 @@ def register(request, uid=None):
                 user.save()
 
                 user_data = {
-                    'username': user.username,
+                    'name': user.username,
                     'email': user.email,
                     'password': user.password,
                     'role': user.role,
@@ -200,7 +200,7 @@ def register(request, uid=None):
 
             # Prepare data for the new user
             user_data = {
-                'username': name,
+                'name': name,
                 'email': email,
                 'password': password,
                 'role': role,
