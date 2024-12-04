@@ -173,8 +173,8 @@ def register(request, uid=None):
                     'phone': user.phone,
                     'balance': 0 if user.role in ['donor', 'student'] else None,  # Balance for donors and students
                     'is_active': True,
-                    'point': user.point,  # Default point value
-                    'student_id': user.student_id if user.role == 'student' else None  # Assign NUID for students
+                    # 'point': user.point,  # Default point value
+                    # 'student_id': user.student_id if user.role == 'student' else None  # Assign NUID for students
                 }
 
                 return JsonResponse({
@@ -208,8 +208,7 @@ def register(request, uid=None):
                 'balance': 0 if role in ['donor', 'student'] else None,
                 'is_active': True,
                 'created_at': now(),
-                'student_id': nuid if role == 'student' else None,
-                'point': 100,
+                #'student_id': nuid if role == 'student' else None,
             }
 
             # Save user to database
@@ -222,7 +221,7 @@ def register(request, uid=None):
                     nuid=nuid,
                     name=name,
                     email=email,
-                    point=0
+                    point=150
                 )
 
             localhost = 'http://localhost:8000'
@@ -286,9 +285,9 @@ def adminDashboard(request):
             remaining=F('quantity')
         ).values('package_name', 'distributed_count', 'remaining')
 
-        # Get student points
+        # Get student infomation
         students = Users.objects.filter(role='student').values(
-            'name', 'point', 'nuid'
+            'name', 'nuid'
         )
 
         # Get distribution history

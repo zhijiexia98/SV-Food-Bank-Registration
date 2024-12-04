@@ -92,8 +92,8 @@ class Users(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_active = models.IntegerField(blank=True, null=True)
     created_at = models.DateTimeField(default=now)
-    point = models.IntegerField(blank=True, null=True)
-    student_id = models.IntegerField(unique=True, blank=True, null=True)
+    # point = models.IntegerField(blank=True, null=True)
+    # student_id = models.IntegerField(unique=True, blank=True, null=True)
 
     class Meta:
         # managed = False
