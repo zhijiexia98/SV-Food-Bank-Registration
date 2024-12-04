@@ -51,7 +51,11 @@ urlpatterns = [
     path('api/student/request_history/<int:uid>', views.student_request_history, name='student_request_history'),
     path('api/food/top_requested', views.top_requested_items, name='top_requested_items'),
     path('api/food/items_by_category', views.available_items_by_category, name='available_items_by_category'),
-
+    path('api/admin/all_requests', views.all_requests, name='all_requests'),
+    path('api/admin/pending_requests', views.pending_requests, name='pending_requests'),
+    path('api/admin/approve_request/<int:request_id>/<int:uid>/', views.approve_request, name='approve_request'),
+    path('api/admin/approved_requests', views.approved_requests, name='approved_requests'),
 ]
+
 
 

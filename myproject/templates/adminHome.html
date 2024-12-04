@@ -118,6 +118,23 @@
             height: auto;
         }
 
+        .list-group {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .list-group-item {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            background-color: #f8f9fa;
+        }
+
+        .float-end {
+            margin-left: auto;
+        }
     </style>
 </head>
 <body>
@@ -157,7 +174,18 @@
                         <h5>Food Packages Overview</h5>
                     </div>
                     <div class="card-body">
-                        <div id="packageStats"></div>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Package Name</th>
+                                    <th>Distributed Amount</th>
+                                    <th>Remaining Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="packageStats">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -193,7 +221,21 @@
                         <h5>Students Overview</h5>
                     </div>
                     <div class="card-body">
-                        <div id="studentPoints"></div>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>NUID</th>
+                                    <th>Points</th>
+                                    <th>Household Number</th>
+                                    <th>Household Income</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentPoints">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -217,12 +259,55 @@
                         <h5>Donation History</h5>
                     </div>
                     <div class="card-body">
-                        <div id="distributionHistory"></div>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Donor</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="distributionHistory">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Requests Overview -->
+        <div class="col-12">
+            <div class="row mb-3 align-items-center">
+                <div class="col-auto">
+                    <button id="viewRequestsButton" class="btn btn-primary me-2">Refresh All Requests</button>
+                    <button id="viewPendingRequestsButton" class="btn btn-primary">See Pending Requests</button>
+                    <button id="viewApprovedRequestsButton" class="btn btn-primary">See Approved Requests</button>
+                </div>
+            </div>
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5>Requests Overview</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Package</th>
+                                <th>Requested At</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsOverview">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
+    
     <!-- Add Food Package Modal -->
     <div class="modal fade" id="addPackageModal" tabindex="-1" aria-labelledby="addPackageModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -369,42 +454,54 @@
 
         function createDistributionHistoryHTML(distributions) {
             if (!distributions || distributions.length === 0) {
-                return '<p>No distribution history available.</p>';
+                return '<tr><td colspan="3">No distribution history available.</td></tr>';
             }
 
-            let html = '<ul>';
+            let html = '';
             distributions.forEach(distribution => {
-                html += `<li>${distribution.donor_id__username} donated ${distribution.amount} on ${new Date(distribution.donated_at).toLocaleDateString()}</li>`;
+                html += `<tr>
+                            <td>${distribution.donor_id__username}</td>
+                            <td>${distribution.amount}</td>
+                            <td>${new Date(distribution.donated_at).toLocaleDateString()}</td>
+                         </tr>`;
             });
-            html += '</ul>';
 
             return html;
         }
 
         function createPackageStatsHTML(packages) {
             if (!packages || packages.length === 0) {
-                return '<p>No package statistics available.</p>';
+                return '<tr><td colspan="3">No package statistics available.</td></tr>';
             }
 
-            let html = '<ul>';
+            let html = '';
             packages.forEach(pkg => {
-                html += `<li>${pkg.package_name}: ${pkg.distributed_count} distributed, ${pkg.remaining} remaining</li>`;
+                html += `<tr>
+                            <td>${pkg.package_name}</td>
+                            <td>${pkg.distributed_count}</td>
+                            <td>${pkg.remaining}</td>
+                         </tr>`;
             });
-            html += '</ul>';
 
             return html;
         }
 
         function createStudentPointsHTML(students) {
             if (!students || students.length === 0) {
-                return '<p>No student points data available.</p>';
+                return '<tr><td colspan="6">No student points data available.</td></tr>';
             }
 
-            let html = '<ul>';
+            let html = '';
             students.forEach(student => {
-                html += `<li>Name: ${student.name} | Email: ${student.email} | NUID: ${student.nuid} | Points: ${student.point} | Household Number: ${student.household_number} | Household Income: ${student.household_income}</li>`;
+                html += `<tr>
+                            <td>${student.name}</td>
+                            <td>${student.email}</td>
+                            <td>${student.nuid}</td>
+                            <td>${student.point}</td>
+                            <td>${student.household_number}</td>
+                            <td>${student.household_income}</td>
+                         </tr>`;
             });
-            html += '</ul>';
 
             return html;
         }
@@ -540,6 +637,114 @@
                 alert('Error adding food package: ' + error.message);
             });
         });
+
+        // Requests Overview
+        document.getElementById('viewRequestsButton').addEventListener('click', fetchAllRequests);
+        document.getElementById('viewPendingRequestsButton').addEventListener('click', fetchPendingRequests);
+
+        function fetchAllRequests() {
+            try {
+                fetch('/api/admin/all_requests')
+                    .then(response => response.json())
+                .then(data => displayRequests(data.requests))
+                .catch(error => console.error('Error fetching all requests:', error));
+            } catch (error) {
+                console.error('Error fetching all requests:', error);
+                alert('Error fetching all requests: ' + error.message);
+            }
+        }
+
+        function fetchPendingRequests() {
+            fetch('/api/admin/pending_requests')
+                .then(response => response.json())
+                .then(data => displayRequests(data.requests))
+                .catch(error => console.error('Error fetching pending requests:', error));
+        }
+
+        function displayRequests(requests) {
+            const requestsOverview = document.getElementById('requestsOverview');
+            if (!requests || requests.length === 0) {
+                return '<tr><td colspan="5">No requests available.</td></tr>';
+            }
+            console.log(requests);
+
+            let html = '';
+            requests.forEach(request => {
+                console.log(request);
+                
+                const approveButton = request.status !== 'approved'
+                    ? `<button onclick="approveRequest(${request.request_id})" class="btn btn-success btn-sm">Approve</button>`
+                    : '';
+
+                html += `<tr>
+                            <td>${request.student__username}</td>
+                            <td>${request.package__package_name}</td>
+                            <td>${new Date(request.requested_at).toLocaleString()}</td>
+                            <td>${request.status}</td>
+                            <td>${approveButton}</td>
+                        </tr>`;
+            });
+
+            return html;
+            }
+
+            // let html = '<ul class="list-group">';
+            // requests.forEach(request => {
+                
+            //     console.log(request);
+
+            //     // Conditionally add the Approve button
+            //     const approveButton =
+            //         request.status !== 'approved'
+            //             ? `<button onclick="approveRequest(${request.request_id})" class="btn btn-success btn-sm float-end">Approve</button>`
+            //             : '';
+
+            //     html += `
+            //         <li class="list-group-item d-flex justify-content-between align-items-center">
+            //             <div>
+            //                 <strong>Student:</strong> ${request.student__username} | 
+            //                 <strong>Package:</strong> ${request.package__package_name} | 
+            //                 <strong>Requested At:</strong> ${new Date(request.requested_at).toLocaleString()}
+            //             </div>
+            //             ${approveButton}
+            //         </li>`;
+            // });
+            // html += '</ul>';
+            // requestsOverview.innerHTML = html;
+
+
+        // Approve Request
+        document.getElementById('viewApprovedRequestsButton').addEventListener('click', fetchApprovedRequests);
+
+        function fetchApprovedRequests() {
+            fetch('/api/admin/approved_requests')
+                .then(response => response.json())
+                .then(data => displayRequests(data.requests))
+                .catch(error => console.error('Error fetching approved requests:', error));
+        }
+
+        function getUidFromUrl() {
+            const pathname = window.location.pathname;
+            // 路径格式为 /adminHome/{uid}/
+            const segments = pathname.split('/');
+            return segments[segments.length - 2];
+        }
+
+        function approveRequest(requestId) {
+            const uid = getUidFromUrl();
+            console.log("approve request", uid);
+            fetch(`/api/admin/approve_request/${requestId}/${uid}/`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Request approved successfully.');
+                        fetchPendingRequests(); // Refresh the pending requests
+                    } else {
+                        alert('Error approving request.');
+                    }
+                })
+                .catch(error => console.error('Error approving request:', error));
+        }
 
 
     </script>

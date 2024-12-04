@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Sum, Count, F
 from datetime import timedelta, timezone, datetime
 from django.utils.timezone import now
+from django.utils import timezone
 from django.conf import settings
 from .models import Users, Student, FoodPackages, Requests, Donations  
 import json
@@ -529,3 +530,33 @@ def add_food_package(request):
     else:
         return JsonResponse({'error': 'Invalid request method. Only POST requests are allowed.'}, status=405)
 
+def all_requests(request):
+    requests = Requests.objects.select_related('student', 'package').values(
+        'request_id', 'student__username', 'package__package_name', 'requested_at', 'status'
+    )
+    #print("all requests", requests)
+    return JsonResponse({'requests': list(requests)})
+
+def pending_requests(request):
+    requests = Requests.objects.filter(status='pending').select_related('student', 'package').values(
+        'request_id', 'student__username', 'package__package_name', 'requested_at', 'status'
+    )
+    return JsonResponse({'requests': list(requests)})
+
+def approved_requests(request):
+    requests = Requests.objects.filter(status='approved').select_related('student', 'package').values(
+        'request_id', 'student__username', 'package__package_name', 'requested_at', 'status'
+    )
+    return JsonResponse({'requests': list(requests)})
+
+def approve_request(request, request_id, uid):
+    print("approve request", request_id, uid)
+    try:
+        req = Requests.objects.get(request_id=request_id)
+        req.status = 'approved'
+        req.processed_at = timezone.now()
+        req.admin_id = uid
+        req.save()
+        return JsonResponse({'success': True})
+    except Requests.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Request not found'}, status=404)
