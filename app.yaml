@@ -8,3 +8,7 @@ handlers:
 
   - url: /.*
     script: auto
+  
+env_variables:
+  DATABASE_URL: "mysql://db_user:secure_password@/foodbank_db?unix_socket=/cloudsql/db-group8-438602:us-central1:foodbankgroup8"
+
