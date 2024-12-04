@@ -118,7 +118,7 @@
           <a class="nav-link" href="profile/"><i class="fas fa-user"></i> Profile</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          <a class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </li>
       </ul>
     </div>
@@ -261,6 +261,11 @@
 
   // Load donations on page load
   document.addEventListener("DOMContentLoaded", fetchDonations);
+
+  function logout() {
+    sessionStorage.clear();
+    window.location.href = '/home';
+  }
 </script>
 </body>
 </html>
