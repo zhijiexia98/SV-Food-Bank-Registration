@@ -45,6 +45,17 @@
         .card-body {
             padding: 15px;
         }
+
+        .btn-primary {
+            background-color: #c41e3a; 
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #852a2e; 
+        }
+
     </style>
 </head>
 <body>
@@ -70,10 +81,10 @@
 
     <div class="container mt-4">
         <div class="row">
-            <div class="button-section">
-                <button id="viewPackagesButton">View All Food Packages</button>
-                <button id="viewStudentsButton">View All Students</button>
-                <button id="viewDonationsButton">View All Donations</button>
+            <div class="button-section mb-3">
+                <button id="viewPackagesButton" class="btn btn-primary me-2">View All Food Packages</button>
+                <button id="viewStudentsButton" class="btn btn-primary me-22">View All Students</button>
+                <button id="viewDonationsButton" class="btn btn-primary me-2">View All Donations</button>
             </div>
             <!-- Food Packages Overview -->
             <div class="col-md-6">
@@ -104,10 +115,10 @@
                 </div>
             </div>
 
-            <div class="filter-section">
-                <input type="date" id="startDate" placeholder="Start Date">
-                <input type="date" id="endDate" placeholder="End Date">
-                <button id="filterButton">Filter Donations</button>
+            <div class="filter-section mb-3">
+                <input type="date" id="startDate" class="form-control me-2 d-inline-block w-auto" placeholder="Start Date">
+                <input type="date" id="endDate" class="form-control me-2 d-inline-block w-auto" placeholder="End Date">
+                <button id="filterButton" class="btn btn-primary me-2">Filter Donations</button>
             </div>
 
             <!-- Donation History -->
