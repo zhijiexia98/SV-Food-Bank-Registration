@@ -8,11 +8,20 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
       :root {
         --primary-color: #c41e3a;
         --secondary-color: #242424;
         --bg-light: #f8f9fa;
+      }
+
+      body {
+        background: linear-gradient(120deg, #e3f2fd, #f1f8e9);
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
       }
 
       .navbar-custom {
@@ -23,7 +32,7 @@
         color: white !important;
       }
 
-      body {
+      .main-container {
         font-family: "Roboto", sans-serif;
         background: linear-gradient(120deg, #e3f2fd, #f1f8e9);
         display: flex;
@@ -270,7 +279,7 @@
           if (userData) {
             userData = JSON.parse(userData);
             // Populate form fields with user data
-            document.getElementById("name").value = userData.name;
+            document.getElementById("username").value = userData.username;
             setInitialRole(userData.role);
             // document.getElementById("role").value = userData.role;
             document.getElementById("email").value = userData.email;
@@ -340,7 +349,19 @@
 
           if (data.success) {
             console.log(data.redirect);
-            window.location.href = data.redirect;
+            console.log(data.user_data);
+            console.log(data.uid);
+            try {
+              sessionStorage.setItem("user_data", JSON.stringify(data.user_data));
+              const { username, role } = data.user_data;
+              console.log(uid, username, role);
+              sessionStorage.setItem("uid", data.uid);
+              sessionStorage.setItem("name", username);
+            } catch (error) {
+              console.log("set user data error: ", error)
+            } finally {
+              window.location.href = data.redirect;
+            }
           } else {
             alert(data.message || 'Registration failed');
           }
@@ -367,12 +388,33 @@
             });
         } else {
           initializeProfilePage(isEditPage);
+          document.getElementById("navbar").style.display = "block";
         }
       });
     </script>
   </head>
       
   <body>
+    <!-- Navbar -->
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-dark navbar-custom" style="display: none">
+      <div class="container">
+          <a class="navbar-brand" onclick="window.location.href='/home/'">NEU Food Bank</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav ms-auto">
+                  <li class="nav-item">
+                      <a class="nav-link" href="profile/"><i class="fas fa-user"></i> Profile</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                  </li>
+              </ul>
+          </div>
+      </div>
+    </nav>
+    <div class="main-container">
     <div class="login-card">
       <h2 id="pageTitle">User Registration</h2>
       <form id="registrationForm" method="POST" action="/register/">
@@ -380,8 +422,8 @@
 
         <!-- Name Field -->
         <div class="form-group">
-          <label for="name">Name:</label>
-          <input type="text" id="name" name="name" required />
+          <label for="username">Name:</label>
+          <input type="text" id="username" name="username" required />
         </div>
 
         <!-- Role Selector -->
@@ -480,6 +522,7 @@
           Submit
         </button>
       </form>
+    </div>
     </div>
   </body>
 </html>
