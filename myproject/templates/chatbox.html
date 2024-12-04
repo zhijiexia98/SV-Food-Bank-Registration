@@ -25,19 +25,12 @@
             color: white;
             padding: 15px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Center the header content */
             align-items: center;
             border-radius: 5px 5px 0 0;
         }
         .chat-header h2 {
             margin: 0;
-        }
-        .profile-icon {
-            color: white;
-            cursor: pointer;
-        }
-        .profile-icon:hover {
-            color: #ddd;
         }
         .chat-box {
             border: 1px solid #ddd;
@@ -109,8 +102,6 @@
 <div class="container">
     <div class="chat-header">
         <h2>Chatbox - NU Food Bank</h2>
-        <p>Role: <strong id="user-role">{{ role }}</strong></p>
-        <i class="fas fa-user-circle profile-icon" id="profile-icon" title="Go to Profile"></i>
     </div>
     <div class="chat-box" id="chat-box">
         <!-- Chat messages will appear here -->
@@ -124,14 +115,7 @@
 <!-- Include jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    const userRole = "{{ role }}";
-    document.getElementById('user-role').innerText = userRole;
-
-    // Redirect to the profile page when the profile icon is clicked
-    document.getElementById('profile-icon').addEventListener('click', () => {
-        window.location.href = '/profile/';
-    });
-
+    // Remove references to userRole and profile-icon
     function appendMessage(message, isUser = true) {
         const chatBox = document.getElementById('chat-box');
         const messageDiv = document.createElement('div');
@@ -191,7 +175,6 @@
                 });
         }
     });
-
 
     document.getElementById('message-input').addEventListener('keypress', function (event) {
         if (event.key === 'Enter' && !event.shiftKey) {
