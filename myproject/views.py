@@ -166,7 +166,7 @@ def register(request, uid=None):
                 user.save()
 
                 user_data = {
-                    'name': user.username,
+                    'username': user.username,
                     'email': user.email,
                     'password': user.password,
                     'role': user.role,
@@ -184,7 +184,7 @@ def register(request, uid=None):
                     'user_data': user_data
                 })
             # Get common fields
-            name = request.POST.get('name')
+            name = request.POST.get('username')
             email = request.POST.get('email', None) or request.POST.get('schoolEmail', None)
             password = request.POST.get('password')
             role = request.POST.get('role')
@@ -200,7 +200,7 @@ def register(request, uid=None):
 
             # Prepare data for the new user
             user_data = {
-                'name': name,
+                'username': name,
                 'email': email,
                 'password': password,
                 'role': role,
@@ -238,7 +238,8 @@ def register(request, uid=None):
                 'success': True,
                 'message': f"Registration successful for {name} with role: {role}.",
                 'redirect': redirect_url,
-                'uid': user.id
+                'uid': user.id,
+                'user_data': user_data
             })
 
         except Exception as e:
@@ -262,7 +263,7 @@ def login(request):
                 user = Users.objects.get(email=email, password=password)
                 user_data = {
                     "uid": user.id,
-                    "name": user.username,
+                    "username": user.username,
                     "email": user.email,
                     "role": user.role,
                     "phone": user.phone,

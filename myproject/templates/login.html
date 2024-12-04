@@ -127,10 +127,10 @@
               console.log(res.data);
               // Store user info in sessionStorage
               sessionStorage.setItem("user_data", JSON.stringify(res.data));
-              const { uid, name, role } = res.data;
-              console.log(uid, name, role);
+              const { uid, username, role } = res.data;
+              console.log(uid, username, role);
               sessionStorage.setItem("uid", uid);
-              sessionStorage.setItem("name", name);
+              sessionStorage.setItem("name", username);
               
 
               // Redirect based on user role
