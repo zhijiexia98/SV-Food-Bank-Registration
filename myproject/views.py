@@ -124,7 +124,7 @@ def student_info(request, uid):
 def available_food_items(request):
     if request.method == 'GET':
         items = FoodPackages.objects.filter(quantity__gt=0).values(
-            'id', 'package_name', 'description', 'quantity', 'price_per_package'
+            'id', 'package_name', 'description', 'quantity', 'price_per_package', 'category', 'dietary'
         )
         return JsonResponse(list(items), safe=False)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -140,8 +140,9 @@ def search_food_items(request):
         if dietary:
             filters['dietary__icontains'] = dietary 
         items = FoodPackages.objects.filter(**filters, quantity__gt=0).values(
-            'id', 'package_name', 'description', 'quantity', 'price_per_package'
+            'id', 'package_name', 'description', 'quantity', 'price_per_package', 'category', 'dietary'
         )
+        print(items)
         return JsonResponse(list(items), safe=False)
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
