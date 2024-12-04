@@ -260,6 +260,11 @@
             field.readOnly = false;
             field.disabled = false; // Enable select elements
           });
+          // disabled role change
+          const roleRadios = document.querySelectorAll('input[name="role"]');
+          roleRadios.forEach((radio) => {
+            radio.disabled = true; // Disable the role radio buttons
+          });
           // Change the button text to "Submit"
           submitButton.textContent = "Submit";
           // Set up the form for submission
@@ -294,6 +299,8 @@
               document.getElementById("schoolEmail").value =
                 userData.schoolEmail || userData.email;
               document.getElementById("nuid").value = userData.student_id;
+              document.getElementById("householdIncome").value = userData.household_income;
+              document.getElementById("householdNumber").value = userData.household_number
               // Toggle student fields visibility
             } else {
               document.getElementById("email").value = userData.email;
@@ -328,7 +335,6 @@
             body: formData,
           });
           const result = await response.json();
-          console.log(result.user_data)
           if (result.success) {
             sessionStorage.setItem("user_data", JSON.stringify(result.user_data))
             sessionStorage.setItem("name", result.user_data.username)
@@ -429,9 +435,6 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
               <ul class="navbar-nav ms-auto">
-                  <li class="nav-item">
-                      <a class="nav-link" href="profile/"><i class="fas fa-user"></i> Profile</a>
-                  </li>
                   <li class="nav-item">
                       <a class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
                   </li>
