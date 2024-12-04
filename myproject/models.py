@@ -76,7 +76,7 @@ class Requests(models.Model):
     processed_at = models.DateTimeField(default=now)
     admin = models.ForeignKey('Users', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
     package = models.ForeignKey(FoodPackages, models.DO_NOTHING, blank=True, null=True)
-    request_id = models.IntegerField(unique=True, blank=True, null=True)
+    request_id = models.IntegerField(unique=True, null=False, primary_key=True)
 
     class Meta:
         # managed = False

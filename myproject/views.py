@@ -73,7 +73,8 @@ def request_food_item(request, uid):
             # Fetch the user by UID
             try:
                 user = Users.objects.get(id=uid, role='student')
-            except Users.DoesNotExist:
+                student = Student.objects.get(user=user)
+            except Student.DoesNotExist:
                 return JsonResponse({'error': 'Student not found'}, status=404)
 
             # Fetch the package
@@ -85,7 +86,7 @@ def request_food_item(request, uid):
             if package.quantity > 0:
                 # Create a new request
                 Requests.objects.create(
-                    student_id=user.student_id,
+                    student_id=student.user_id,
                     package_id=package.id,
                     amount=1,  # Assuming 1 package per request
                     reason="Student requested package",
@@ -95,6 +96,10 @@ def request_food_item(request, uid):
                 # Decrement the package quantity
                 package.quantity -= 1
                 package.save()
+
+                student.point -= package.point_per_package
+                student.save()
+                print("student point", student.point)
 
                 return JsonResponse({'success': True, 'message': 'Request submitted successfully'})
             else:
@@ -406,6 +411,7 @@ def top_requested_items(request):
     return JsonResponse({'top_items': list(top_items)})
 
 def student_request_history(request, uid):
+    print("student request history", uid)
     requests = Requests.objects.filter(student_id=uid).values(
         'package__package_name', 'amount', 'requested_at', 'status'
     ).order_by('-requested_at')

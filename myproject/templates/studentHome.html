@@ -221,7 +221,7 @@
                     return;
                 }
                 const data = await response.json();
-                console.log(data);
+                console.log("Loading user info", data.point);
                 document.getElementById('studentName').textContent = data.name;
                 document.getElementById('studentId').textContent = data.nuid;
                 document.getElementById('studentPoints').textContent = data.point;
@@ -310,6 +310,9 @@
                     alert(data.message);
                     // Optionally, refresh available items or update UI
                     loadAvailableItems();
+                    loadRequestHistory(uid);
+                    loadUserInfo(uid);
+                    loadTopRequestedItems();
                 } else {
                     alert(`Error: ${data.message || data.error}`);
                 }
@@ -324,7 +327,8 @@
                 const response = await fetch('/api/food/top_requested');
                 const data = await response.json();
                 const list = document.getElementById('topRequestedItems');
-                list.innerHTML = data.top_items.map(item => `<li class="list-group-item">${item.package__package_name}: ${item.total_requested} requests</li>`).join('');
+                list.innerHTML = data.top_items.map(item => `<li class="list-group-item">${item.package__package_name}
+                    : ${parseInt(item.total_requested)} requests</li>`).join('');
             } catch (error) {
                 console.error('Error loading top requested items:', error);
             }
@@ -335,7 +339,10 @@
                 const response = await fetch(`/api/student/request_history/${uid}`);
                 const data = await response.json();
                 const list = document.getElementById('requestHistory');
-                list.innerHTML = data.request_history.map(req => `<li class="list-group-item">${req.package__package_name}: ${req.amount} requested on ${new Date(req.requested_at).toLocaleDateString()} - ${req.status}</li>`).join('');
+                list.innerHTML = data.request_history.map(
+                    req => `<li class="list-group-item">${req.package__package_name}: 
+                        ${parseInt(req.amount)} requested on ${new Date(req.requested_at).toLocaleDateString()} 
+                        - ${req.status}</li>`).join('');
             } catch (error) {
                 console.error('Error loading request history:', error);
             }

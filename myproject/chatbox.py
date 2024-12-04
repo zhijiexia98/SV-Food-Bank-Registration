@@ -63,7 +63,7 @@ def process_natural_language_query(user_query):
          - point_per_package (integer)
 
          **requests**
-         - id (auto-incremented primary key)
+        # - id (auto-incremented primary key)
          - student_id (foreign key to users)
          - amount (decimal)
          - reason (text)
