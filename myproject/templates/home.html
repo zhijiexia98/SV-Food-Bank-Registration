@@ -64,6 +64,12 @@
         .button.admin:hover {
             background: linear-gradient(45deg, #3c6382, #60a3bc);
         }
+        .button.chatbox {
+            background: linear-gradient(45deg, #ff6b6b, #ee5253);
+        }
+        .button.chatbox:hover {
+            background: linear-gradient(45deg, #ee5253, #ff6b6b);
+        }
         .entrance-text {
             font-size: 1.2em;
             font-weight: semibold;
@@ -100,41 +106,46 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Northeastern University Silicon Valley Food Bank</h1>
-        <p class="quote-text">
-            "Making a difference starts with one step, one dollar, one donation at
-            a time."
-        </p>
-        <div class="button-group">
-            <button class="button donor" id="donorBtn">Donor</button>
-            <button class="button student" id="studentBtn">Student</button>
-            <button class="button admin" id="adminBtn">Admin</button>
-        </div>
-        <p class="register-link">
-            New user? Register <a href="/register/">here</a>
-        </p>
+<div class="container">
+    <h1>Northeastern University Silicon Valley Food Bank</h1>
+    <p class="quote-text">
+        "Making a difference starts with one step, one dollar, one donation at
+        a time."
+    </p>
+    <div class="button-group">
+        <button class="button donor" id="donorBtn">Donor</button>
+        <button class="button student" id="studentBtn">Student</button>
+        <button class="button admin" id="adminBtn">Admin</button>
+        <button class="button chatbox" id="chatboxBtn">Chatbox</button>
     </div>
+    <p class="register-link">
+        New user? Register <a href="/register/">here</a>
+    </p>
+</div>
 
-    <script>
-        $(document).ready(function() {
-            function handleRoleSelection(role) {
-                localStorage.setItem('role', role);
-                window.location.href = '/login/';
-            }
+<script>
+    $(document).ready(function() {
+        function handleRoleSelection(role, url = '/login/') {
+            localStorage.setItem('role', role);
+            window.location.href = url;
+        }
 
-            $('#donorBtn').click(function() {
-                handleRoleSelection('donor');
-            });
-
-            $('#studentBtn').click(function() {
-                handleRoleSelection('student');
-            });
-
-            $('#adminBtn').click(function() {
-                handleRoleSelection('admin');
-            });
+        $('#donorBtn').click(function() {
+            handleRoleSelection('donor');
         });
-    </script>
+
+        $('#studentBtn').click(function() {
+            handleRoleSelection('student');
+        });
+
+        $('#adminBtn').click(function() {
+            handleRoleSelection('admin');
+        });
+
+        $('#chatboxBtn').click(function() {
+            window.location.href = '/chatbox/';
+        });
+    });
+</script>
 </body>
 </html>

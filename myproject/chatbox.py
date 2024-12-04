@@ -56,7 +56,6 @@ def process_natural_language_query(user_query):
          - description (text, nullable)
          - quantity (integer)
          - price_per_package (decimal)
-         - total_cost (decimal)
          - purchased_at (datetime)
          - admin_id (foreign key to users)
          - category (varchar)
