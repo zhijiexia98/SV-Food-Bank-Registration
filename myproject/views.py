@@ -168,12 +168,7 @@ def register(request, uid=None):
                 user.role = request.POST.get('role', user.role)
                 user.phone = request.POST.get('phone', user.phone)
                 user.password = request.POST.get('password', user.password)
-                
-                # user.address = request.POST.get('address', user.address)
-                if user.role == 'student':
-                    user.household_number = request.POST.get('householdNumber', user.household_number)
-                    user.household_income = request.POST.get('householdIncome', user.household_income)
-                    user.student_id = request.POST.get('nuid', user.student_id)
+
                 user.save()
 
                 user_data = {
@@ -184,11 +179,24 @@ def register(request, uid=None):
                     'phone': user.phone,
                     'balance': 0 if user.role in ['donor', 'student'] else None,  # Balance for donors and students
                     'is_active': True,
-                    'household_number': user.household_number,
-                    'household_income': user.household_income,
+                    # 'household_number': user.household_number,
+                    # 'household_income': user.household_income,
                     # 'point': user.point,  # Default point value
                     # 'student_id': user.student_id if user.role == 'student' else None  # Assign NUID for students
                 }
+                
+                # user.address = request.POST.get('address', user.address)
+                if user.role == 'student':
+                    student = Student.objects.get(user=user)
+                    student.household_number = request.POST.get('householdNumber', student.household_number)
+                    student.household_income = request.POST.get('householdIncome', student.household_income)
+                    student.nuid = request.POST.get('nuid', student.nuid)
+                    student.save()
+                    user_data.update({
+                        "student_id": student.nuid,
+                        "household_income": student.household_income,
+                        "household_number": student.household_number,
+                    })
 
                 return JsonResponse({
                     'success': True,
@@ -232,15 +240,24 @@ def register(request, uid=None):
 
             # If the role is student, create a Student record
             if role == 'student':
-                Student.objects.create(
-                    user=user,
-                    nuid=nuid,
-                    name=name,
-                    email=email,
-                    point=150,
-                    household_number=household_number,
-                    household_income=household_income,
-                )
+                try:
+                    student = Student.objects.create(
+                        user=user,
+                        nuid=nuid,
+                        name=name,
+                        email=email,
+                        point=150,
+                        household_number=household_number,
+                        household_income=household_income,
+                    )
+                except Exception as e:
+                    return JsonResponse({'success': False, 'message': "student create failed"}, status=500)
+                
+                user_data.update({
+                    "student_id": student.nuid,
+                    "household_income": student.household_income,
+                    "household_number": student.household_number,
+                })
 
             localhost = 'http://localhost:8000'
             redirect_url = localhost
@@ -284,9 +301,22 @@ def login(request):
                     "email": user.email,
                     "role": user.role,
                     "phone": user.phone,
-                    "student_id": getattr(user, 'student_id', None),
                     "password": password,
                 }
+                if user.role == "student":
+                    try:
+                        # Fetch the associated student data
+                        student = Student.objects.get(user=user)
+                        user_data.update({
+                            "student_id": student.nuid,
+                            "household_income": student.household_income,
+                            "household_number": student.household_number,
+                            "point": student.point,
+                        })
+                    except Student.DoesNotExist:
+                        # Handle case where student details are not available
+                        return JsonResponse({"error": "Student details not found."}, status=404)
+                    
                 return JsonResponse({"success": True, "data": user_data})
             except Users.DoesNotExist:
                 return JsonResponse({"error": "Invalid credentials."}, status=401)
