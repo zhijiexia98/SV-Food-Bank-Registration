@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ValidationError
 from django.db.models import Sum, Count, F
-from datetime import timedelta, timezone
+from datetime import timedelta, timezone, datetime
 from django.utils.timezone import now
 from django.conf import settings
 from .models import Users, Student, FoodPackages, Requests, Donations  
@@ -12,6 +12,7 @@ from django.utils.timezone import now
 from django.utils.dateparse import parse_date
 from django.utils.timezone import make_aware
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
 # from openai.error import AuthenticationError, RateLimitError, OpenAIError
 
 def fetch_donations(request, user_id):
@@ -367,9 +368,15 @@ def all_food_packages(request):
     packages = FoodPackages.objects.annotate(
         distributed_count=Count('requests'),
         remaining=F('quantity')
-    ).values('package_name', 'distributed_count', 'remaining')
-    print(packages)
+    ).values(
+        'package_name',
+        'distributed_count',
+        'remaining',
+        'price_per_package',
+        'quantity'
+    )
     return JsonResponse({'packages': list(packages)})
+
 
 def all_students(request):
     students = Student.objects.all().values('name', 'nuid', 'point', 'household_number', 'household_income', 'email')
@@ -409,3 +416,80 @@ def available_items_by_category(request):
         'category', 'id', 'package_name', 'description', 'quantity', 'price_per_package'
     ).order_by('category')
     return JsonResponse({'items_by_category': list(items)})
+
+def add_food_package(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+
+            # Extract and validate all required fields
+            required_fields = [
+                'package_name', 'description', 'quantity', 'point_per_package',
+                'admin_id', 'category', 'dietary', 'price_per_package'
+            ]
+
+            missing_fields = []
+
+            for field in required_fields:
+                if field not in data or data[field] is None or (isinstance(data[field], str) and data[field].strip() == ''):
+                    missing_fields.append(field)
+
+            if missing_fields:
+                return JsonResponse({'error': f'The following fields are required and cannot be empty: {", ".join(missing_fields)}.'}, status=400)
+
+            # Now that all fields are present, extract them
+            package_name = data['package_name']
+            description = data['description']
+            quantity = data['quantity']
+            point_per_package = data['point_per_package']
+            admin_id = data['admin_id']
+            category = data['category']
+            dietary = data['dietary']
+            price_per_package = data['price_per_package']
+
+            # Validate and parse required fields
+            quantity = int(quantity)
+            point_per_package = int(point_per_package)
+            price_per_package = float(price_per_package)
+            admin_id = int(admin_id)
+            purchased_at = datetime.now(timezone.utc)
+
+            # Validate enum fields
+            CATEGORY_CHOICES = ['fruits', 'grains', 'protein', 'dairy']
+            DIETARY_CHOICES = ['vegetarian', 'vegan', 'halal', 'glutenFree']
+
+            if category not in CATEGORY_CHOICES:
+                return JsonResponse({'error': f'Invalid category. Must be one of {CATEGORY_CHOICES}.'}, status=400)
+
+            if dietary not in DIETARY_CHOICES:
+                return JsonResponse({'error': f'Invalid dietary preference. Must be one of {DIETARY_CHOICES}.'}, status=400)
+
+            # Create the FoodPackage instance
+            food_package = FoodPackages(
+                package_name=package_name,
+                description=description,
+                quantity=quantity,
+                point_per_package=point_per_package,
+                price_per_package=price_per_package,
+                admin_id=admin_id,
+                category=category,
+                dietary=dietary,
+                purchased_at=purchased_at
+            )
+
+            # Save the instance to the database
+            food_package.save()
+
+            return JsonResponse({'message': 'Food package added successfully.'}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+        except ValueError as ve:
+            return JsonResponse({'error': f'Invalid value: {str(ve)}'}, status=400)
+        except IntegrityError as ie:
+            return JsonResponse({'error': 'Database error occurred.'}, status=500)
+        except Exception as e:
+            return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request method. Only POST requests are allowed.'}, status=405)
+

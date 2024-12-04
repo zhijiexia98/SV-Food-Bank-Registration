@@ -47,6 +47,7 @@ urlpatterns = [
     path('api/admin/all_students', views.all_students, name='all_students'),
     path('api/admin/all_donations', views.all_donations, name='all_donations'),
     path('api/admin/student_by_nuid', views.student_by_nuid, name='student_by_nuid'),
+    path('api/admin/add_food_package', views.add_food_package, name='add_food_package'),
 
 ]
 

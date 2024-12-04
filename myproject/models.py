@@ -57,7 +57,6 @@ class FoodPackages(models.Model):
     description = models.TextField(blank=True, null=True)
     quantity = models.IntegerField()
     price_per_package = models.DecimalField(max_digits=10, decimal_places=2)
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2)
     purchased_at = models.DateTimeField(default=now)
     admin = models.ForeignKey('Users', models.DO_NOTHING)
     point_per_package = models.IntegerField(blank=True, null=True)

@@ -146,7 +146,8 @@
         <div class="row d-flex align-items-start">
             <!-- Button Section -->
             <div class="col-12 mb-3 d-flex justify-content-start">
-                <button id="viewPackagesButton" class="btn btn-primary me-2">View All Food Packages</button>
+                <button id="viewPackagesButton" class="btn btn-primary me-2">Refresh All Food Packages</button>
+                <button id="addPackageButton" class="btn btn-primary me-2">Add Food Packages</button>
             </div>
             
             <!-- Food Packages Overview -->
@@ -178,7 +179,7 @@
             <div class="col-12">
                 <div class="row mb-3 align-items-center">
                     <div class="col-auto">
-                        <button id="viewStudentsButton" class="btn btn-primary">View All Students</button>
+                        <button id="viewStudentsButton" class="btn btn-primary">Refresh All Students</button>
                     </div>
                     <div class="col">
                         <div class="input-group">
@@ -201,7 +202,7 @@
             <div class="col-12">
                 <div class="row mb-3 align-items-center">
                     <div class="col-auto">
-                        <button id="viewDonationsButton" class="btn btn-primary me-2">View All Donations</button>
+                        <button id="viewDonationsButton" class="btn btn-primary me-2">Refresh All Donations</button>
                     </div>
                     <div class="col">
                         <div class="filter-section">
@@ -222,44 +223,150 @@
             </div>
         </div>
     </div>
+    <!-- Add Food Package Modal -->
+    <div class="modal fade" id="addPackageModal" tabindex="-1" aria-labelledby="addPackageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="addPackageForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPackageModalLabel">Add Food Package</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form fields -->
+                        <div class="mb-3">
+                            <label for="packageName" class="form-label">Package Name</label>
+                            <input type="text" class="form-control" id="packageName" name="package_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pointPerPackage" class="form-label">Points per Package</label>
+                            <input type="number" class="form-control" id="pointPerPackage" name="point_per_package">
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Select a category</option>
+                                <option value="fruits">Fruits</option>
+                                <option value="grains">Grains</option>
+                                <option value="protein">Protein</option>
+                                <option value="dairy">Dairy</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dietary" class="form-label">Dietary Preference</label>
+                            <select class="form-select" id="dietary" name="dietary">
+                                <option value="">Select a dietary preference</option>
+                                <option value="vegetarian">Vegetarian</option>
+                                <option value="vegan">Vegan</option>
+                                <option value="halal">Halal</option>
+                                <option value="glutenFree">Gluten Free</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pricePerPackage" class="form-label">Price per Package</label>
+                            <input type="number" step="0.01" class="form-control" id="pricePerPackage" name="price_per_package">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add Package</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Include this before your custom script) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
     <script>
+        // Global variables to store fetched data
+        let donationsData = [];
+        let packagesData = [];
+
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardData();
         });
 
         async function loadDashboardData() {
             try {
-                const response = await fetch('/api/admin/dashboard');
-                const data = await response.json();
-                console.log(data);
-                updateDashboard(data);
+                // Fetch all dashboard data
+                await Promise.all([
+                    fetchFoodPackages(),
+                    fetchStudents(),
+                    fetchDonations(),
+                ]);
+                calculateAndDisplayTotalBalance();
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
         }
 
-        function updateDashboard(data) {
-            // Update package stats
-            const packageStats = document.getElementById('packageStats');
-            packageStats.innerHTML = createPackageStatsHTML(data.packages);
-
-            // Update student points
-            const studentPoints = document.getElementById('studentPoints');
-            studentPoints.innerHTML = createStudentPointsHTML(data.students);
-
-            // Update donation history
-            const distributionHistory = document.getElementById('distributionHistory');
-            distributionHistory.innerHTML = createDistributionHistoryHTML(data.distributions);
-
-            // Update total balance
-            const totalBalance = document.getElementById('totalBalance');
-            console.log(data.total_balance)
-            totalBalance.textContent = `$${data.total_balance}`;
+        // Fetch Donations
+        function fetchDonations() {
+            return fetch('/api/admin/all_donations')
+                .then(response => response.json())
+                .then(data => {
+                    donationsData = data.donations || [];
+                    const distributionHistory = document.getElementById('distributionHistory');
+                    distributionHistory.innerHTML = createDistributionHistoryHTML(donationsData);
+                })
+                .catch(error => console.error('Error fetching donations:', error));
         }
 
-        
+        // Fetch Food Packages
+        function fetchFoodPackages() {
+            return fetch('/api/admin/all_food_packages')
+                .then(response => response.json())
+                .then(data => {
+                    packagesData = data.packages || [];
+                    const packageStats = document.getElementById('packageStats');
+                    packageStats.innerHTML = createPackageStatsHTML(packagesData);
+                })
+                .catch(error => console.error('Error fetching food packages:', error));
+        }
+
+        // Fetch Students
+        function fetchStudents() {
+            return fetch('/api/admin/all_students')
+                .then(response => response.json())
+                .then(data => {
+                    const studentPoints = document.getElementById('studentPoints');
+                    studentPoints.innerHTML = createStudentPointsHTML(data.students);
+                })
+                .catch(error => console.error('Error fetching students:', error));
+        }
+
+        // Calculate and display total balance
+        function calculateAndDisplayTotalBalance() {
+            // Calculate total donations amount
+            const totalDonations = donationsData.reduce((sum, donation) => sum + parseFloat(donation.amount || 0), 0);
+
+            // Calculate total cost of all packages
+            const totalPackagesCost = packagesData.reduce((sum, pkg) => {
+                const price = parseFloat(pkg.price_per_package || 0);
+                const quantity = parseInt(pkg.quantity || 0); // Use the 'quantity' from the backend
+                return sum + (price * quantity);
+            }, 0);
+
+            // Calculate total balance
+            const totalBalanceAmount = totalDonations - totalPackagesCost;
+
+            // Update the total balance in the DOM
+            const totalBalance = document.getElementById('totalBalance');
+            totalBalance.textContent = `$${totalBalanceAmount.toFixed(2)}`;
+        }
+
+
         function createDistributionHistoryHTML(distributions) {
             if (!distributions || distributions.length === 0) {
                 return '<p>No distribution history available.</p>';
@@ -316,43 +423,19 @@
         });
 
         document.getElementById('viewPackagesButton').addEventListener('click', function() {
-            fetch('/api/admin/all_food_packages')
-                .then(response => response.json())
-                .then(data => {
-                    const packageStats = document.getElementById('packageStats');
-                    packageStats.innerHTML = createPackageStatsHTML(data.packages);
-                })
-                .catch(error => console.error('Error fetching food packages:', error));
+            Promise.all([fetchFoodPackages(), fetchDonations()]).then(() => {
+                calculateAndDisplayTotalBalance();
+            });
         });
 
         document.getElementById('viewStudentsButton').addEventListener('click', function() {
-            fetch('/api/admin/all_students')
-                .then(response => response.json())
-                .then(data => {
-                    const studentPoints = document.getElementById('studentPoints');
-                    studentPoints.innerHTML = createStudentPointsHTML(data.students);
-                })
-                .catch(error => console.error('Error fetching students:', error));
+            fetchStudents();
         });
 
         document.getElementById('viewDonationsButton').addEventListener('click', function() {
-            fetch('/api/admin/all_donations')
-                .then(response => response.json())
-                .then(data => {
-                    const distributionHistory = document.getElementById('distributionHistory');
-                    distributionHistory.innerHTML = createDistributionHistoryHTML(data.donations);
-                })
-                .catch(error => console.error('Error fetching donations:', error));
-        });
-
-        document.getElementById('viewStudentsButton').addEventListener('click', function() {
-            fetch('/api/admin/all_students')
-                .then(response => response.json())
-                .then(data => {
-                    const studentPoints = document.getElementById('studentPoints');
-                    studentPoints.innerHTML = createStudentPointsHTML(data.students);
-                })
-                .catch(error => console.error('Error fetching students:', error));
+            Promise.all([fetchDonations(), fetchFoodPackages()]).then(() => {
+                calculateAndDisplayTotalBalance();
+            });
         });
 
         document.getElementById('searchNuidButton').addEventListener('click', function() {
@@ -385,6 +468,80 @@
             sessionStorage.clear();
             window.location.href = '/home';
         }
+
+        // Event listener for "Add Food Packages" button
+        document.getElementById('addPackageButton').addEventListener('click', function() {
+            var addPackageModal = new bootstrap.Modal(document.getElementById('addPackageModal'));
+            addPackageModal.show();
+        });
+
+        // Form submission for adding a new food package
+        document.getElementById('addPackageForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Collect form data
+            var package_name = document.getElementById('packageName').value.trim();
+            var description = document.getElementById('description').value.trim();
+            var quantity = parseInt(document.getElementById('quantity').value);
+            var point_per_package = parseInt(document.getElementById('pointPerPackage').value); // Parse as integer
+            var category = document.getElementById('category').value; // Get selected value
+            var dietary = document.getElementById('dietary').value; // Get selected value
+            var price_per_package = parseFloat(document.getElementById('pricePerPackage').value); // Parse as float
+
+
+            // Validate required fields
+            if (!package_name || isNaN(quantity) || isNaN(point_per_package) || !category || !dietary || isNaN(price_per_package)) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            // Get admin_id from URL
+            var url = window.location.href;
+            var adminId = url.split('/').filter(Boolean).pop();
+
+            // Prepare data object
+            var data = {
+                'package_name': package_name,
+                'description': description,
+                'quantity': quantity,
+                'point_per_package': point_per_package,
+                'category': category,
+                'dietary': dietary,
+                'price_per_package': price_per_package,
+                'admin_id': adminId
+            };
+
+            // Send data to backend
+            fetch('/api/admin/add_food_package', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Food package added successfully.');
+                    // Close the modal
+                    var addPackageModal = bootstrap.Modal.getInstance(document.getElementById('addPackageModal'));
+                    addPackageModal.hide();
+                    // Refresh the package list and recalculate total balance
+                    Promise.all([fetchFoodPackages(), fetchDonations()]).then(() => {
+                        calculateAndDisplayTotalBalance();
+                    });
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Failed to add food package.');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error adding food package:', error);
+                alert('Error adding food package: ' + error.message);
+            });
+        });
+
+
     </script>
 </body>
 </html>
