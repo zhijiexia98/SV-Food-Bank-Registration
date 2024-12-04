@@ -155,7 +155,7 @@ def register(request, uid=None):
                 user = get_object_or_404(Users, id=uid)
                 
                 # Update fields
-                user.username = request.POST.get('name', user.username)
+                user.username = request.POST.get('username', user.username)
                 user.email = request.POST.get('email', user.email) or request.POST.get('schoolEmail', user.email)
                 user.role = request.POST.get('role', user.role)
                 user.phone = request.POST.get('phone', user.phone)

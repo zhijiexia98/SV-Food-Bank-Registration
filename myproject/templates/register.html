@@ -267,8 +267,7 @@
             .getElementById("registrationForm")
             .addEventListener("submit", async (e) => {
               e.preventDefault();
-              const formData = new FormData(e.target);
-              updateUserData(formData, url, uid);
+              updateUserData(url, uid);
             });
         }
       }
@@ -305,10 +304,15 @@
         }
       }
 
-      async function updateUserData(formData, url, uid) {
-        // const formData = new FormData(
-        //   document.getElementById("registrationForm")
-        // );
+      async function updateUserData(url, uid) {
+        const formData = new FormData(
+          document.getElementById("registrationForm")
+        );
+        // Log FormData contents
+        console.log("FormData contents:");
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}: ${value}`);
+        }
         try {
           const urlPath = `/${url}/${uid}/profile/edit/`; // Ensure URL is correctly formed
           console.log("Fetch URL:", urlPath);
@@ -321,10 +325,12 @@
             body: formData,
           });
           const result = await response.json();
+          console.log(result.user_data)
           if (result.success) {
+            sessionStorage.setItem("user_data", JSON.stringify(result.user_data))
+            sessionStorage.setItem("name", result.user_data.username)
             alert("Profile updated successfully!");
             console.log(result.user_data)
-            sessionStorage.setItem("user_data", JSON.stringify(result.user_data))
             window.location.href = `/${url}/${uid}/profile/`;
           } else {
             alert(result.message || "Failed to update profile.");
@@ -354,7 +360,7 @@
             try {
               sessionStorage.setItem("user_data", JSON.stringify(data.user_data));
               const { username, role } = data.user_data;
-              console.log(uid, username, role);
+              console.log(data.uid, username, role);
               sessionStorage.setItem("uid", data.uid);
               sessionStorage.setItem("name", username);
             } catch (error) {
@@ -391,6 +397,17 @@
           document.getElementById("navbar").style.display = "block";
         }
       });
+
+      function navigateHome() {
+        const path = window.location.pathname;
+        const segments = path.split('/').filter(segment => segment);
+        if (segments.length >= 2) {
+          const basePath = `/${segments[0]}/${segments[1]}/`;
+          window.location.href = basePath;
+        } else {
+          window.location.href = '/';
+        }
+      }
     </script>
   </head>
       
@@ -398,7 +415,7 @@
     <!-- Navbar -->
     <nav id="navbar" class="navbar navbar-expand-lg navbar-dark navbar-custom" style="display: none">
       <div class="container">
-          <a class="navbar-brand" onclick="window.location.href='/home/'">NEU Food Bank</a>
+          <a class="navbar-brand" onclick="navigateHome()">NEU Food Bank</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
               <span class="navbar-toggler-icon"></span>
           </button>
