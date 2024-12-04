@@ -90,6 +90,8 @@ class Student(models.Model):
     name = models.CharField(max_length=255)
     email = models.CharField(unique=True, max_length=255)
     point = models.IntegerField(blank=True, null=True)
+    household_income = models.IntegerField(blank=True, null=True)
+    household_number = models.IntegerField(blank=True, null=True)
 
     class Meta:
         db_table = 'student'

@@ -60,6 +60,64 @@
             background-color: #852a2e; 
         }
 
+        .short-input {
+            max-width: 200px;
+        }
+
+        /**** Updated Total Balance Card Styling ****/
+        .total-balance-card {
+            background-color: white;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15); /* Apple-inspired shadow */
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%; /* Match height with Food Packages Overview */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .total-balance-card .card-header {
+            background-color: white; /* Apple-style plain header */
+            color: var(--primary-color);
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .balance-label {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 3.5rem; /* Large, prominent font */
+            font-weight: bold;
+            color: var(--primary-color);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Apple-inspired font */
+            margin: 0;
+        }
+
+        .total-balance-card .card-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .row.d-flex {
+            align-items: flex-start; /* Ensures top alignment */
+        }
+
+        
+        #viewPackagesButton {
+            margin: 0; 
+            padding: 10px 20px;
+        }
+
+       
+        .card.dashboard-card {
+            height: auto;
+        }
+
     </style>
 </head>
 <body>
@@ -84,12 +142,13 @@
     </nav>
 
     <div class="container mt-4">
-        <div class="row">
-            <div class="button-section mb-3">
+        <!-- Top Row with Button and Cards -->
+        <div class="row d-flex align-items-start">
+            <!-- Button Section -->
+            <div class="col-12 mb-3 d-flex justify-content-start">
                 <button id="viewPackagesButton" class="btn btn-primary me-2">View All Food Packages</button>
-                <button id="viewStudentsButton" class="btn btn-primary me-22">View All Students</button>
-                <button id="viewDonationsButton" class="btn btn-primary me-2">View All Donations</button>
             </div>
+            
             <!-- Food Packages Overview -->
             <div class="col-md-6">
                 <div class="card dashboard-card">
@@ -101,14 +160,33 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" id="nuidSearchInput" placeholder="Enter NUID">
-                <button class="btn btn-outline-secondary" type="button" id="searchNuidButton">Search</button>
-            </div>
-            <!-- Students Overview -->
+    
+            <!-- Total Balance Card -->
             <div class="col-md-6">
-                
+                <div class="card dashboard-card total-balance-card">
+                    <div class="card-header">
+                        <h5>Total Balance</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="balance-label">Current Total</p>
+                        <h1 id="totalBalance" class="balance-amount">$0.00</h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Overview -->
+            <div class="col-12">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-auto">
+                        <button id="viewStudentsButton" class="btn btn-primary">View All Students</button>
+                    </div>
+                    <div class="col">
+                        <div class="input-group">
+                            <input type="text" class="form-control short-input" id="nuidSearchInput" placeholder="Enter NUID">
+                            <button class="btn btn-outline-secondary" type="button" id="searchNuidButton">Search</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="card dashboard-card">
                     <div class="card-header">
                         <h5>Students Overview</h5>
@@ -119,14 +197,20 @@
                 </div>
             </div>
 
-            <div class="filter-section mb-3">
-                <input type="date" id="startDate" class="form-control me-2 d-inline-block w-auto" placeholder="Start Date">
-                <input type="date" id="endDate" class="form-control me-2 d-inline-block w-auto" placeholder="End Date">
-                <button id="filterButton" class="btn btn-primary me-2">Filter Donations</button>
-            </div>
-
             <!-- Donation History -->
             <div class="col-12">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-auto">
+                        <button id="viewDonationsButton" class="btn btn-primary me-2">View All Donations</button>
+                    </div>
+                    <div class="col">
+                        <div class="filter-section">
+                            <input type="date" id="startDate" class="form-control me-2 d-inline-block w-auto" placeholder="Start Date">
+                            <input type="date" id="endDate" class="form-control me-2 d-inline-block w-auto" placeholder="End Date">
+                            <button id="filterButton" class="btn btn-primary me-2">Filter Donations</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="card dashboard-card">
                     <div class="card-header">
                         <h5>Donation History</h5>
@@ -149,6 +233,7 @@
             try {
                 const response = await fetch('/api/admin/dashboard');
                 const data = await response.json();
+                console.log(data);
                 updateDashboard(data);
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
@@ -164,10 +249,16 @@
             const studentPoints = document.getElementById('studentPoints');
             studentPoints.innerHTML = createStudentPointsHTML(data.students);
 
-            // Update distribution history
+            // Update donation history
             const distributionHistory = document.getElementById('distributionHistory');
             distributionHistory.innerHTML = createDistributionHistoryHTML(data.distributions);
+
+            // Update total balance
+            const totalBalance = document.getElementById('totalBalance');
+            console.log(data.total_balance)
+            totalBalance.textContent = `$${data.total_balance}`;
         }
+
         
         function createDistributionHistoryHTML(distributions) {
             if (!distributions || distributions.length === 0) {
@@ -204,7 +295,7 @@
 
             let html = '<ul>';
             students.forEach(student => {
-                html += `<li>${student.name} (ID: ${student.nuid}): ${student.point} points</li>`;
+                html += `<li>Name: ${student.name} | Email: ${student.email} | NUID: ${student.nuid} | Points: ${student.point} | Household Number: ${student.household_number} | Household Income: ${student.household_income}</li>`;
             });
             html += '</ul>';
 
@@ -271,8 +362,15 @@
                     .then(response => response.json())
                     .then(data => {
                         const studentPoints = document.getElementById('studentPoints');
+                        console.log(data)
                         if (data.student) {
-                            studentPoints.innerHTML = `<li>${data.student.name} (ID: ${data.student.nuid}): ${data.student.point} points</li>`;
+                            studentPoints.innerHTML = `<li>
+                                Name: ${data.student.name} | 
+                                Email: ${data.student.email} | 
+                                NUID: ${data.student.nuid} | 
+                                Points: ${data.student.point} | 
+                                Household Number: ${data.student.household_number} | 
+                                Household Income: ${data.student.household_income}</li>`;
                         } else {
                             studentPoints.innerHTML = '<p>No student found with that NUID.</p>';
                         }

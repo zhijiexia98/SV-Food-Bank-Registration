@@ -162,8 +162,11 @@ def register(request, uid=None):
                 user.role = request.POST.get('role', user.role)
                 user.phone = request.POST.get('phone', user.phone)
                 user.password = request.POST.get('password', user.password)
+                
                 # user.address = request.POST.get('address', user.address)
                 if user.role == 'student':
+                    user.household_number = request.POST.get('householdNumber', user.household_number)
+                    user.household_income = request.POST.get('householdIncome', user.household_income)
                     user.student_id = request.POST.get('nuid', user.student_id)
                 user.save()
 
@@ -175,6 +178,8 @@ def register(request, uid=None):
                     'phone': user.phone,
                     'balance': 0 if user.role in ['donor', 'student'] else None,  # Balance for donors and students
                     'is_active': True,
+                    'household_number': user.household_number,
+                    'household_income': user.household_income,
                     # 'point': user.point,  # Default point value
                     # 'student_id': user.student_id if user.role == 'student' else None  # Assign NUID for students
                 }
@@ -196,6 +201,8 @@ def register(request, uid=None):
 
             # Role-specific fields
             nuid = request.POST.get('nuid') if role == 'student' else None
+            household_number = request.POST.get('householdNumber') if role == 'student' else None
+            household_income = request.POST.get('householdIncome') if role == 'student' else None
 
             # Validation
             if not name or not email or not password or not role:
@@ -224,7 +231,9 @@ def register(request, uid=None):
                     nuid=nuid,
                     name=name,
                     email=email,
-                    point=150
+                    point=150,
+                    household_number=household_number,
+                    household_income=household_income,
                 )
 
             localhost = 'http://localhost:8000'
@@ -282,33 +291,41 @@ def login(request):
 
 def adminDashboard(request):
     try:
-        # Get package statistics
-        packages = FoodPackages.objects.annotate(
-            distributed_count=Count('requests'),
-            remaining=F('quantity')
-        ).values('package_name', 'distributed_count', 'remaining')
+        # # Get package statistics
+        # packages = FoodPackages.objects.annotate(
+        #     distributed_count=Count('requests'),
+        #     remaining=F('quantity')
+        # ).values('package_name', 'distributed_count', 'remaining')
 
-        # Get student infomation
-        students = Users.objects.filter(role='student').values(
-            'name', 'nuid'
-        )
+        # # Get student infomation
+        # students = Student.objects.select_related('user').values(
+        #     'user__username',          # Username
+        #     'nuid',                    # Student ID
+        #     'user__email',             # Email
+        #     'household_number',        # Household number
+        #     'household_income'         # Household income
+        # )
 
-        # Get distribution history
-        distributions = Requests.objects.select_related(
-            'student', 'package'
-        ).filter(
-            status='approved'
-        ).values(
-            'student__username',
-            'package__package_name',
-            'requested_at',
-            'amount'
-        ).order_by('-requested_at')[:50]
+        # # Get distribution history
+        # distributions = Requests.objects.select_related(
+        #     'student', 'package'
+        # ).filter(
+        #     status='approved'
+        # ).values(
+        #     'student__username',
+        #     'package__package_name',
+        #     'requested_at',
+        #     'amount'
+        # ).order_by('-requested_at')[:50]
+
+        total_balance = Donations.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+        print("total_bal", total_balance)
 
         return JsonResponse({
-            'packages': list(packages),
-            'students': list(students),
-            'distributions': list(distributions)
+            # 'packages': list(packages),
+            # 'students': list(students),
+            # 'distributions': list(distributions),
+            'total_balance': total_balance
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
@@ -355,7 +372,7 @@ def all_food_packages(request):
     return JsonResponse({'packages': list(packages)})
 
 def all_students(request):
-    students = Student.objects.all().values('name', 'nuid', 'point')
+    students = Student.objects.all().values('name', 'nuid', 'point', 'household_number', 'household_income', 'email')
     return JsonResponse({'students': list(students)})
 
 def all_donations(request):
@@ -366,7 +383,12 @@ def student_by_nuid(request):
     nuid = request.GET.get('nuid')
     try:
         student = Student.objects.get(nuid=nuid)
-        return JsonResponse({'student': {'name': student.name, 'nuid': student.nuid, 'point': student.point}})
+        return JsonResponse({'student': {'name': student.name, 
+                                         'nuid': student.nuid, 
+                                         'point': student.point, 
+                                         'email': student.email, 
+                                         'household_number': student.household_number, 
+                                         'household_income': student.household_income}})
     except Student.DoesNotExist:
         return JsonResponse({'student': None})
 
