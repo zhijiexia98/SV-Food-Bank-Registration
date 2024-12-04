@@ -130,6 +130,9 @@
       .form-group input[type="radio"] {
         width: 20px;
       }
+      .nav-link:hover {
+        cursor: pointer;
+      }
     </style>
 
     <script>
@@ -501,6 +504,7 @@
               id="nuid"
               name="nuid"
               maxlength="10"
+              min="0"
               placeholder="Enter your 10-digit NUID"
             />
           </div>
@@ -512,6 +516,7 @@
               id="householdIncome"
               name="householdIncome"
               maxlength="8"
+              min="0"
               placeholder="Income in USD"
             />
           </div>
@@ -522,6 +527,7 @@
               type="number"
               id="householdNumber"
               name="householdNumber"
+              min="0"
               placeholder="Number of members"
             />
           </div>

@@ -40,6 +40,17 @@ class Donations(models.Model):
         # managed = False
         db_table = 'donations'
 
+class Category(models.TextChoices):
+    FRUITS = 'fruits', 'Fruits & Vegetables'
+    GRAINS = 'grains', 'Grains & Pasta'
+    PROTEIN = 'protein', 'Protein'
+    DAIRY = 'dairy', 'Dairy'
+
+class Dietary(models.TextChoices):
+    VEGETARIAN = 'vegetarian', 'Vegetarian'
+    VEGAN = 'vegan', 'Vegan'
+    HALAL = 'halal', 'Halal'
+    GLUTEN_FREE = 'gluten_free', 'Gluten Free'
 
 class FoodPackages(models.Model):
     package_name = models.CharField(max_length=255)
@@ -49,9 +60,11 @@ class FoodPackages(models.Model):
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
     purchased_at = models.DateTimeField(default=now)
     admin = models.ForeignKey('Users', models.DO_NOTHING)
+    point_per_package = models.IntegerField(blank=True, null=True)
+    category = models.CharField(max_length=20, choices=Category.choices, blank=True, null=True)
+    dietary = models.CharField(max_length=20, choices=Dietary.choices, blank=True, null=True)
 
     class Meta:
-        # managed = False
         db_table = 'food_packages'
 
 

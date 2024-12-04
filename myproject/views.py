@@ -134,10 +134,11 @@ def search_food_items(request):
         category = request.GET.get('category', None)
         dietary = request.GET.get('dietary', None)
         filters = {}
+        print(filters, category, dietary)
         if category:
             filters['category'] = category
         if dietary:
-            filters['dietary_preferences__icontains'] = dietary  # Assuming dietary_preferences is a field
+            filters['dietary__icontains'] = dietary 
         items = FoodPackages.objects.filter(**filters, quantity__gt=0).values(
             'id', 'package_name', 'description', 'quantity', 'price_per_package'
         )
@@ -183,6 +184,7 @@ def register(request, uid=None):
                     'uid': user.id,
                     'user_data': user_data
                 })
+            
             # Get common fields
             name = request.POST.get('username')
             email = request.POST.get('email', None) or request.POST.get('schoolEmail', None)

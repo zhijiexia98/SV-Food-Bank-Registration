@@ -59,6 +59,9 @@ def process_natural_language_query(user_query):
          - total_cost (decimal)
          - purchased_at (datetime)
          - admin_id (foreign key to users)
+         - category (varchar)
+         - dietary (varchar)
+         - point_per_package (integer)
 
          **requests**
          - id (auto-incremented primary key)
@@ -89,8 +92,8 @@ def process_natural_language_query(user_query):
          - balance (decimal, nullable)
          - is_active (integer, nullable)
          - created_at (datetime)
-         - point (integer, nullable)
-         - student_id (unique integer, nullable)
+        #  - point (integer, nullable)
+        #  - student_id (unique integer, nullable)
 
          ### Instructions:
 

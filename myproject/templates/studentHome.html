@@ -86,6 +86,9 @@
             border-radius: 50%;
             margin-bottom: 15px;
         }
+        .nav-link:hover {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -241,8 +244,11 @@
             const category = document.getElementById('categoryFilter').value;
             const dietary = document.getElementById('dietaryFilter').value;
             
+            console.log(`Searching items with category: ${category}, dietary: ${dietary}`);
+
             try {
                 const response = await fetch(`/api/food/search?category=${category}&dietary=${dietary}`);
+                console.log(response)
                 const items = await response.json();
                 displayItems(items);
             } catch (error) {
