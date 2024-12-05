@@ -63,7 +63,6 @@ def process_natural_language_query(user_query):
          - point_per_package (integer)
 
          **requests**
-        # - id (auto-incremented primary key)
          - student_id (foreign key to users)
          - amount (decimal)
          - reason (text)
@@ -91,8 +90,6 @@ def process_natural_language_query(user_query):
          - balance (decimal, nullable)
          - is_active (integer, nullable)
          - created_at (datetime)
-        #  - point (integer, nullable)
-        #  - student_id (unique integer, nullable)
 
          ### Instructions:
 
@@ -115,7 +112,12 @@ def process_natural_language_query(user_query):
         raw_query = response['choices'][0]['message']['content'].strip()
 
         # Step 2: Clean SQL Query
-        sql_query = re.sub(r"^```[a-zA-Z]*\n|```$", "", raw_query).strip()
+        matches = re.findall(r"```(?:sql)?\n(.*?)```", raw_query, re.DOTALL | re.IGNORECASE)
+        if matches:
+            sql_query = matches[0].strip()
+        else:
+            sql_query = raw_query.strip()
+
 
         # Step 3: Fix SQL for MySQL Compliance
         if "GROUP BY" in sql_query and "ORDER BY" in sql_query:
@@ -128,11 +130,11 @@ def process_natural_language_query(user_query):
                 select_part, rest_of_query = sql_query.split("FROM", 1)
                 if aggregation not in select_part:
                     # Add aggregation to SELECT
-                    select_part = select_part.strip() + f", {aggregation} AS total_donated"
+                    select_part = select_part.strip() + f", {aggregation} AS total"
                     sql_query = f"{select_part} FROM {rest_of_query}"
 
                 # Ensure alias is referenced in ORDER BY
-                sql_query = sql_query.replace(f"ORDER BY {aggregation}", "ORDER BY total_donated")
+                sql_query = sql_query.replace(f"ORDER BY {aggregation}", "ORDER BY total")
 
         # Strip leading/trailing whitespace
         sql_query = sql_query.strip()
