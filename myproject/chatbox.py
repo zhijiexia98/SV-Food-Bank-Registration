@@ -180,7 +180,8 @@ def chatbox_view(request):
             # Format the result into a string for frontend display
             if isinstance(result, list):
                 # If the result is a list of dictionaries (e.g., from SELECT queries), format it
-                response_text = "\n".join([str(row) for row in result])
+                #response_text = "\n".join([str(row) for row in result])
+                response_text = generate_natural_language_response(result)
             elif isinstance(result, str):
                 # If the result is already a string (e.g., for INSERT/UPDATE), use it directly
                 response_text = result
@@ -196,3 +197,23 @@ def chatbox_view(request):
     else:
         # For GET request, render the chatbox.html template
         return render(request, 'chatbox.html')
+
+def generate_natural_language_response(query_results):
+    """将数据库查询结果转换为自然语言描述"""
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": 
+                 "change the querying result to simple, friendly and understandable natural language."},
+                {"role": "user", "content": str(query_results)}
+            ],
+            max_tokens=300,
+            temperature=0.7
+        )
+        
+        natural_language_result = response['choices'][0]['message']['content'].strip()
+        return natural_language_result
+    
+    except Exception as e:
+        return f"error when generating natural language response: {str(e)}"
