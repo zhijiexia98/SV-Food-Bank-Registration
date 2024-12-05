@@ -119,7 +119,7 @@
 <body>
 <div class="container">
     <div class="chat-header text-center">
-        <h2 onclick="window.location.href='/home'">Chatbox - NU Food Bank</h2>
+        <h2 onclick="navigateHome()">Chatbox - NU Food Bank</h2>
         <p class="subtitle">Your most advanced Open SQL querying companion.</p>
     </div>
     <div class="chat-box" id="chat-box">
@@ -163,6 +163,17 @@
         }
         return cookieValue;
     }
+
+    function navigateHome() {
+        const path = window.location.pathname;
+        const segments = path.split('/').filter(segment => segment);
+        if (segments.length >= 2) {
+          const basePath = `/${segments[0]}/${segments[1]}/`;
+          window.location.href = basePath;
+        } else {
+          window.location.href = '/';
+        }
+      }
 
     document.getElementById('send-btn').addEventListener('click', () => {
         const messageInput = document.getElementById('message-input');
