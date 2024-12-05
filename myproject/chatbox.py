@@ -168,7 +168,7 @@ def process_natural_language_query(user_query):
 
 
 
-def chatbox_view(request):
+def chatbox_view(request, uid):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
