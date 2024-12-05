@@ -1,6 +1,8 @@
 runtime: python311
 
-entrypoint: gunicorn -b :$PORT myproject.wsgi
+# entrypoint: gunicorn -b :$PORT myproject.wsgi
+entrypoint: gunicorn -b :$PORT myproject.wsgi:application
+
 runtime_config:
   python_version: 3.11
 handlers:
