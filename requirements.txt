@@ -13,7 +13,7 @@ idna==3.10
 jiter==0.8.0
 mysql-connector-python==9.1.0
 mysqlclient==2.2.6
-openai==1.56.2
+openai==0.27.0
 pycparser==2.22
 pydantic==2.10.3
 pydantic_core==2.27.1

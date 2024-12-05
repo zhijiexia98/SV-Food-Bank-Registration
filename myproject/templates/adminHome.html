@@ -389,6 +389,7 @@
                     fetchFoodPackages(),
                     fetchStudents(),
                     fetchDonations(),
+                    fetchAllRequests()
                 ]);
                 calculateAndDisplayTotalBalance();
             } catch (error) {
@@ -685,8 +686,9 @@
                         </tr>`;
             });
 
+            requestsOverview.innerHTML = html;
             return html;
-            }
+        }
 
             // let html = '<ul class="list-group">';
             // requests.forEach(request => {

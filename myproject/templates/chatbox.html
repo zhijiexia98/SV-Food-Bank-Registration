@@ -11,22 +11,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa; /* Lighter background for better contrast */
+            background: linear-gradient(120deg, #e3f2fd, #f1f8e9);
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
+            min-height: 100vh;
         }
+
         .container {
+            display: flex;
+            flex-direction: column;
             margin: 50px auto;
             max-width: 600px; /* Centered and fixed width */
+            min-width: 600px;
+            min-height: 80vh;
+            max-height: 80vh;
             background: white;
             border-radius: 8px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for better aesthetics */
             overflow: hidden;
         }
+
         .chat-header {
-            background-color: #007BFF;
+            background-color: #c41e3a;
             color: white;
+            width: 100%;
             padding: 20px;
         }
         .chat-header h2 {
@@ -36,20 +45,19 @@
         .chat-header .subtitle {
             margin: 5px 0 0;
             font-size: 14px;
-            color: #cce5ff; /* Slightly lighter shade for the subtitle */
+            color: #ffccd5; /* Slightly lighter shade for the subtitle */
         }
         .chat-box {
             max-height: 400px;
             overflow-y: auto;
             padding: 15px;
             border-top: 1px solid #ddd;
-            border-bottom: 1px solid #ddd;
         }
         .input-section {
+            margin-top: auto;
             display: flex;
             gap: 10px;
             padding: 10px;
-            background-color: #f4f4f9;
         }
         .input-section textarea {
             flex: 1;
@@ -60,7 +68,7 @@
             min-height: 50px; /* Larger height for better usability */
         }
         .input-section button {
-            background-color: #007BFF;
+            background-color: #c41e3a;
             color: white;
             border: none;
             border-radius: 20px;
@@ -100,7 +108,7 @@
             max-width: 70%;
         }
         .chat-message.user p {
-            background-color: #007BFF;
+            background-color: #c41e3a;
             color: white;
         }
     </style>
@@ -129,9 +137,9 @@
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
         messageDiv.innerHTML = `
-            ${isUser ? '' : `<img src="{% static 'images/bot.png' %}" alt="Bot">`}
+            ${isUser ? '' : `<img src="https://i.pinimg.com/originals/50/ce/bf/50cebfe4734e7d0367f7edc05b8a5bb0.png" alt="Bot">`}
             <p>${message}</p>
-            ${isUser ? `<img src="{% static 'images/user.png' %}" alt="User">` : ''}
+            ${isUser ? `<img src="https://i.pinimg.com/736x/d9/ef/2c/d9ef2c336632d15472f44d2115627a10.jpg" alt="User">` : ''}
         `;
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
