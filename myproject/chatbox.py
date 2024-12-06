@@ -169,6 +169,8 @@ def process_natural_language_query(user_query):
 
 
 def chatbox_view(request, uid):
+    user = Users.objects.get(id=uid)
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -179,24 +181,20 @@ def chatbox_view(request, uid):
 
             # Format the result into a string for frontend display
             if isinstance(result, list):
-                # If the result is a list of dictionaries (e.g., from SELECT queries), format it
-                #response_text = "\n".join([str(row) for row in result])
                 response_text = generate_natural_language_response(result)
             elif isinstance(result, str):
-                # If the result is already a string (e.g., for INSERT/UPDATE), use it directly
                 response_text = result
             else:
-                # Handle other unexpected cases
                 response_text = str(result)
 
             return JsonResponse({'response': response_text})
         except Exception as e:
-            # Log the exception for debugging
             print(f"Error in chatbox_view: {e}")
             return JsonResponse({'error': 'An error occurred while processing your request.'}, status=500)
     else:
-        # For GET request, render the chatbox.html template
-        return render(request, 'chatbox.html')
+        # For GET request, add a welcome message
+        welcome_message = "Hello! I'm your food bank assistant. How can I help you today?"
+        return render(request, 'chatbox.html', {'user': user, 'welcome_message': welcome_message})
 
 def generate_natural_language_response(query_results):
     """将数据库查询结果转换为自然语言描述"""
