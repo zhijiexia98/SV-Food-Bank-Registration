@@ -148,6 +148,13 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    // Retrieve the welcome message passed from the backend (if any)
+    const welcomeMessage = "{{ welcome_message|escapejs }}";
+    if (welcomeMessage) {
+        // Append the welcome message from the bot (isUser = false)
+        appendMessage(welcomeMessage, false);
+    }
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -175,6 +182,12 @@
         }
       }
 
+    const path = window.location.pathname;
+    const segments = path.split('/').filter(segment => segment);
+    // Assuming the URL is /adminHome/86/chatbox/
+    // segments will be ["adminHome", "86", "chatbox"]
+    const uid = segments[1]; // "86"
+
     document.getElementById('send-btn').addEventListener('click', () => {
         const messageInput = document.getElementById('message-input');
         const userMessage = messageInput.value.trim();
@@ -186,7 +199,7 @@
             // Disable the button temporarily
             document.getElementById('send-btn').disabled = true;
 
-            fetch('/chatbox/', {
+            fetch(`/adminHome/${uid}/chatbox/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
