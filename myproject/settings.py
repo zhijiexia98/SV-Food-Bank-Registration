@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from dotenv import load_dotenv
-
+import pymysql # noqa: 402
+pymysql.version_info = (1, 4, 6, 'final', 0) # change mysqlclient version
+pymysql.install_as_MySQLdb()
 
 
 load_dotenv()
@@ -20,8 +22,9 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+STATIC_ROOT = 'static'
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Use 'staticfiles' for deployment compatibility
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Use 'staticfiles' for deployment compatibility
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -82,18 +85,28 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-
+if os.getenv("GAE_ENV", "").startswith("flexible"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '/cloudsql/db-group8-438602:us-central1:foodbankgroup8',
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'NAME': os.getenv('DB_NAME'),
     }
 }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT'),
+
+        }
+    }
 
 
 
