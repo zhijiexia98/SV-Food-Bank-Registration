@@ -372,10 +372,10 @@
               console.log(data.uid, username, role);
               sessionStorage.setItem("uid", data.uid);
               sessionStorage.setItem("name", username);
+
+              window.location.href = data.redirect;
             } catch (error) {
               console.log("set user data error: ", error)
-            } finally {
-              window.location.href = data.redirect;
             }
           } else {
             alert(data.message || 'Registration failed');
