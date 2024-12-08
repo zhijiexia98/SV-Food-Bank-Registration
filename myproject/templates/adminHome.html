@@ -147,9 +147,23 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" onclick="window.location.href = window.location.href+'chatbox/'"><i class="fas fa-comment"></i> Chatbox</a>
-                    </li>
+                    <a class="nav-link" onclick="goToChatbox()">
+                        <i class="fas fa-comment"></i> Chatbox
+                    </a>
+
+                    <script>
+                        function goToChatbox() {
+                            const uid = getUidFromUrl(); // This should return something like '86'
+                            if (uid) {
+                                // Construct the correct URL using the UID
+                                window.location.href = `/adminHome/${uid}/chatbox/`;
+                            } else {
+                                // Handle the case where UID is not found
+                                alert('UID not found in the URL. Cannot navigate to chatbox.');
+                            }
+                        }
+                    </script>
+
                     <li class="nav-item">
                         <a class="nav-link" href="profile/"><i class="fas fa-user"></i> Profile</a>
                     </li>
