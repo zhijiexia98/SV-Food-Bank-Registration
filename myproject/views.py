@@ -260,14 +260,14 @@ def register(request, uid=None):
                     "household_number": student.household_number,
                 })
 
-            localhost = 'http://localhost:8000'
-            redirect_url = localhost
+            deployed_url = 'https://db-group8-438602.uw.r.appspot.com'
+            redirect_url = deployed_url
             if role == 'student':
-                redirect_url = f'{localhost}/studentHome/{user.id}/'
+                redirect_url = f'{deployed_url}/studentHome/{user.id}/'
             elif role == 'donor':
-                redirect_url = f'{localhost}/donation/{user.id}/'
+                redirect_url = f'{deployed_url}/donation/{user.id}/'
             elif role == 'admin':
-                redirect_url = f'{localhost}/adminHome/{user.id}/'
+                redirect_url = f'{deployed_url}/adminHome/{user.id}/'
                 
             return JsonResponse({
                 'success': True,
